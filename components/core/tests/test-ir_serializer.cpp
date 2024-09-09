@@ -4,6 +4,11 @@
 #include <numeric>
 #include <string>
 #include <vector>
+#include <fstream>
+#include <iomanip>
+#include <sstream>
+#include <ctime>
+#include <iostream>
 
 #include <Catch2/single_include/catch2/catch.hpp>
 
@@ -27,6 +32,12 @@ using std::chrono::system_clock;
 using std::is_same_v;
 using std::string;
 using std::vector;
+using std::ifstream;
+using std::string;
+using std::getline;
+using std::istringstream;
+using std::time_t;
+using std::tm;
 
 namespace {
 struct TestLogEvent {
@@ -117,4 +128,62 @@ TEMPLATE_TEST_CASE(
     REQUIRE(deserialized_result.has_error());
 
     std::filesystem::remove(ir_test_file);
+}
+
+void read_events(vector<TestLogEvent> &test_log_events) {
+    tm tm = {};
+
+    ifstream log_file{"test.log"};
+    string line;
+    char comma;
+    int milliseconds;
+    while (getline(log_file, line)) {
+        istringstream ss(line.substr(0, 23));
+        ss >> std::get_time(&tm, "%Y-%m-%d %H:%M:%S") >> comma >> milliseconds;
+        auto timeSinceEpoch = std::mktime(&tm);
+        auto unixTimestampInMilliseconds = static_cast<long long>(timeSinceEpoch) * 1000 + milliseconds;
+
+        test_log_events.push_back({ unixTimestampInMilliseconds, line.substr(23) });
+    }
+
+}
+
+TEMPLATE_TEST_CASE(
+        "End-to-end cncode and serialize log events ",
+        "[ir][serialize-e2e]",
+        four_byte_encoded_variable_t,
+        eight_byte_encoded_variable_t
+) {
+    vector<TestLogEvent> test_log_events;
+    read_events(test_log_events);
+
+    string ir_test_file = "ir_serializer_test_e2e";
+    ir_test_file += cIrFileExtension;
+
+    LogEventSerializer<TestType> serializer;
+    REQUIRE(serializer.open(ir_test_file));
+    for (auto const& test_log_event : test_log_events) {
+        serializer.serialize_log_event(test_log_event.timestamp, test_log_event.msg);
+    }
+    serializer.close();
+}
+
+TEMPLATE_TEST_CASE(
+        "End-to-end cncode and serialize log events with Parseus",
+        "[ir][parseus-e2e]"
+        four_byte_encoded_variable_t,
+        eight_byte_encoded_variable_t
+) {
+        vector<TestLogEvent> test_log_events;
+    read_events(test_log_events);
+
+    string ir_test_file = "ir_parseus_test_e2e";
+    ir_test_file += cIrFileExtension;
+
+    LogEventSerializer<TestType> serializer;
+    REQUIRE(serializer.open(ir_test_file));
+    for (auto const& test_log_event : test_log_events) {
+        serializer.rd_serialize_log_event(test_log_event.timestamp, test_log_event.msg);
+    }
+    serializer.close();
 }
