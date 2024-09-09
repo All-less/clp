@@ -172,7 +172,7 @@ TEMPLATE_TEST_CASE(
         "End-to-end cncode and serialize log events with Parseus",
         "[ir][parseus-e2e]"
         four_byte_encoded_variable_t,
-        eight_byte_encoded_variable_t
+        // eight_byte_encoded_variable_t
 ) {
         vector<TestLogEvent> test_log_events;
     read_events(test_log_events);

@@ -304,6 +304,41 @@ set(SOURCE_FILES_unitTest
         src/clp/clp/run.hpp
         src/clp/clp/utils.cpp
         src/clp/clp/utils.hpp
+        src/clp/compressor_frontend/Constants.hpp
+        src/clp/compressor_frontend/finite_automata/RegexAST.hpp
+        src/clp/compressor_frontend/finite_automata/RegexAST.tpp
+        src/clp/compressor_frontend/finite_automata/RegexDFA.hpp
+        src/clp/compressor_frontend/finite_automata/RegexDFA.tpp
+        src/clp/compressor_frontend/finite_automata/RegexNFA.hpp
+        src/clp/compressor_frontend/finite_automata/RegexNFA.tpp
+        src/clp/compressor_frontend/finite_automata/UnicodeIntervalTree.hpp
+        src/clp/compressor_frontend/finite_automata/UnicodeIntervalTree.tpp
+        src/clp/compressor_frontend/LALR1Parser.cpp
+        src/clp/compressor_frontend/LALR1Parser.hpp
+        src/clp/compressor_frontend/LALR1Parser.tpp
+        src/clp/compressor_frontend/Lexer.hpp
+        src/clp/compressor_frontend/Lexer.tpp
+        src/clp/compressor_frontend/LogParser.cpp
+        src/clp/compressor_frontend/LogParser.hpp
+        src/clp/compressor_frontend/SchemaParser.cpp
+        src/clp/compressor_frontend/SchemaParser.hpp
+        src/clp/compressor_frontend/Token.cpp
+        src/clp/compressor_frontend/Token.hpp
+        src/clp/compressor_frontend/RDToken.cpp
+        src/clp/compressor_frontend/RDToken.hpp
+        src/clp/compressor_frontend/utils.cpp
+        src/clp/compressor_frontend/utils.hpp
+        src/clp/compressor_frontend/Common.hpp
+        src/clp/compressor_frontend/Common.cpp
+        src/clp/compressor_frontend/SplitMsg.hpp
+        src/clp/compressor_frontend/SplitMsg.cpp
+        src/clp/compressor_frontend/Buffer.hpp
+        src/clp/compressor_frontend/LogInputBuffer.cpp
+        src/clp/compressor_frontend/LogInputBuffer.hpp
+        src/clp/compressor_frontend/LogOutputBuffer.cpp
+        src/clp/compressor_frontend/LogOutputBuffer.hpp
+        src/clp/compressor_frontend/RDParser.cpp
+        src/clp/compressor_frontend/RDParser.hpp
         src/clp/CurlDownloadHandler.cpp
         src/clp/CurlDownloadHandler.hpp
         src/clp/CurlEasyHandle.hpp

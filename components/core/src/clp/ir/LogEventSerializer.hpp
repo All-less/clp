@@ -8,6 +8,7 @@
 #include <type_traits>
 #include <vector>
 
+#include "../compressor_frontend/RDParser.hpp"
 #include "../ErrorCode.hpp"
 #include "../FileWriter.hpp"
 #include "../streaming_compression/zstd/Compressor.hpp"
@@ -121,6 +122,7 @@ private:
     std::vector<int8_t> m_ir_buf;
     FileWriter m_writer;
     streaming_compression::zstd::Compressor m_zstd_compressor;
+    compressor_frontend::RDParser parser;
 
     bool m_is_open{false};
 };

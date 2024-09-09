@@ -130,6 +130,44 @@ auto LogEventSerializer<encoded_variable_t>::serialize_log_event(
 }
 
 template <typename encoded_variable_t>
+auto LogEventSerializer<encoded_variable_t>::rd_serialize_log_event(
+        epoch_time_ms_t timestamp,
+        string_view message
+) -> bool {
+    if (false == m_is_open) {
+        throw OperationFailed(ErrorCode_NotInit, __FILENAME__, __LINE__);
+    }
+
+    string logtype;
+    bool res{};
+    auto const buf_size_before_serialization = m_ir_buf.size();
+    if constexpr (std::is_same_v<encoded_variable_t, eight_byte_encoded_variable_t>) {
+        res = clp::ffi::ir_stream::eight_byte_encoding::rd_serialize_log_event(
+                timestamp,
+                message,
+                logtype,
+                m_ir_buf
+        );
+    } else {
+        auto const timestamp_delta = timestamp - m_prev_event_timestamp;
+        m_prev_event_timestamp = timestamp;
+        res = clp::ffi::ir_stream::four_byte_encoding::rd_serialize_log_event(
+                timestamp_delta,
+                message,
+                logtype,
+                m_ir_buf
+        );
+    }
+    if (false == res) {
+        return false;
+    }
+    m_serialized_size += m_ir_buf.size() - buf_size_before_serialization;
+    ++m_num_log_events;
+    return true;
+}
+
+
+template <typename encoded_variable_t>
 auto LogEventSerializer<encoded_variable_t>::close_writer() -> void {
     m_zstd_compressor.close();
     m_writer.close();

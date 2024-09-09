@@ -216,6 +216,23 @@ bool serialize_log_event(
     return true;
 }
 
+bool rd_serialize_log_event(
+        epoch_time_ms_t timestamp_delta,
+        string_view message,
+        string& logtype,
+        vector<int8_t>& ir_buf
+) {
+    if (false == rd_serialize_message(message, logtype, ir_buf)) {
+        return false;
+    }
+
+    if (false == serialize_timestamp(timestamp_delta, ir_buf)) {
+        return false;
+    }
+
+    return true;
+}
+
 bool serialize_message(string_view message, string& logtype, vector<int8_t>& ir_buf) {
     auto encoded_var_handler = [&ir_buf](four_byte_encoded_variable_t encoded_var) {
         ir_buf.push_back(cProtocol::Payload::VarFourByteEncoding);
@@ -224,6 +241,31 @@ bool serialize_message(string_view message, string& logtype, vector<int8_t>& ir_
 
     if (false
         == encode_message_generically<four_byte_encoded_variable_t>(
+                message,
+                logtype,
+                ir::escape_and_append_const_to_logtype,
+                encoded_var_handler,
+                DictionaryVariableHandler(ir_buf)
+        ))
+    {
+        return false;
+    }
+
+    if (false == serialize_logtype(logtype, ir_buf)) {
+        return false;
+    }
+
+    return true;
+}
+
+bool rd_serialize_message(string_view message, string& logtype, vector<int8_t>& ir_buf) {
+    auto encoded_var_handler = [&ir_buf](four_byte_encoded_variable_t encoded_var) {
+        ir_buf.push_back(cProtocol::Payload::VarFourByteEncoding);
+        serialize_int(encoded_var, ir_buf);
+    };
+
+    if (false
+        == rd_encode_message_generically<four_byte_encoded_variable_t>(
                 message,
                 logtype,
                 ir::escape_and_append_const_to_logtype,
