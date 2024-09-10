@@ -16,6 +16,7 @@
 
 using std::string;
 using std::to_string;
+using clp::FileReader;
 
 /**
  * utf8 format (https://en.wikipedia.org/wiki/UTF-8)
@@ -131,7 +132,6 @@ namespace compressor_frontend {
                     string err = "Lexer failed to find a match after checking entire buffer";
                     err += " at line " + to_string(m_line);
                     err += " in file " + dynamic_cast<FileReader*>(m_reader)->get_path();
-                    dynamic_cast<FileReader*>(m_reader)->close();
                     throw (err); // this throw allows for continuation of compressing other files 
                 }
                 m_reader->read(m_active_byte_buf + m_current_buff_size / 2, m_current_buff_size / 2, m_bytes_read);
@@ -255,7 +255,6 @@ namespace compressor_frontend {
                     string err = "Lexer failed to find a match after checking entire buffer";
                     err += " at line " + to_string(m_line);
                     err += " in file " + dynamic_cast<FileReader*>(m_reader)->get_path();
-                    dynamic_cast<FileReader*>(m_reader)->close();
                     throw (err); // this throw allows for continuation of compressing other files 
                 }
                 m_reader->read(m_active_byte_buf + m_current_buff_size / 2, m_current_buff_size / 2, m_bytes_read);

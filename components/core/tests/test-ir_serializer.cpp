@@ -141,7 +141,7 @@ void read_events(vector<TestLogEvent> &test_log_events) {
         istringstream ss(line.substr(0, 23));
         ss >> std::get_time(&tm, "%Y-%m-%d %H:%M:%S") >> comma >> milliseconds;
         auto timeSinceEpoch = std::mktime(&tm);
-        auto unixTimestampInMilliseconds = static_cast<long long>(timeSinceEpoch) * 1000 + milliseconds;
+        auto unixTimestampInMilliseconds = static_cast<epoch_time_ms_t>(timeSinceEpoch) * 1000 + milliseconds;
 
         test_log_events.push_back({ unixTimestampInMilliseconds, line.substr(23) });
     }
@@ -163,18 +163,18 @@ TEMPLATE_TEST_CASE(
     LogEventSerializer<TestType> serializer;
     REQUIRE(serializer.open(ir_test_file));
     for (auto const& test_log_event : test_log_events) {
-        serializer.serialize_log_event(test_log_event.timestamp, test_log_event.msg);
+        REQUIRE(serializer.serialize_log_event(test_log_event.timestamp, test_log_event.msg));
     }
     serializer.close();
 }
 
 TEMPLATE_TEST_CASE(
         "End-to-end cncode and serialize log events with Parseus",
-        "[ir][parseus-e2e]"
-        four_byte_encoded_variable_t,
+        "[ir][parseus-e2e]",
+        four_byte_encoded_variable_t
         // eight_byte_encoded_variable_t
 ) {
-        vector<TestLogEvent> test_log_events;
+    vector<TestLogEvent> test_log_events;
     read_events(test_log_events);
 
     string ir_test_file = "ir_parseus_test_e2e";
@@ -183,7 +183,7 @@ TEMPLATE_TEST_CASE(
     LogEventSerializer<TestType> serializer;
     REQUIRE(serializer.open(ir_test_file));
     for (auto const& test_log_event : test_log_events) {
-        serializer.rd_serialize_log_event(test_log_event.timestamp, test_log_event.msg);
+        REQUIRE(serializer.rd_serialize_log_event(test_log_event.timestamp, test_log_event.msg));
     }
     serializer.close();
 }

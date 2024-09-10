@@ -31,6 +31,7 @@ using std::set;
 using std::string;
 using std::unique_ptr;
 using std::vector;
+using clp::overloaded;
 
 namespace compressor_frontend {
     template <typename NFAStateType, typename DFAStateType>

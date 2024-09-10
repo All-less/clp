@@ -82,6 +82,12 @@ bool serialize_log_event(
         std::string& logtype,
         std::vector<int8_t>& ir_buf
 );
+bool rd_serialize_log_event(
+        ir::epoch_time_ms_t timestamp_delta,
+        std::string_view message,
+        std::string& logtype,
+        std::vector<int8_t>& ir_buf
+);
 
 /**
  * Serializes the given message into the four-byte encoding IR stream
@@ -92,6 +98,7 @@ bool serialize_log_event(
  * @return true on success, false otherwise
  */
 bool serialize_message(std::string_view message, std::string& logtype, std::vector<int8_t>& ir_buf);
+bool rd_serialize_message(std::string_view message, std::string& logtype, std::vector<int8_t>& ir_buf);
 
 /**
  * Serializes the given timestamp delta into the four-byte encoding IR stream

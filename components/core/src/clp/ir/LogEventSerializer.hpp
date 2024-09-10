@@ -90,6 +90,8 @@ public:
      */
     [[nodiscard]] auto
     serialize_log_event(epoch_time_ms_t timestamp, std::string_view message) -> bool;
+    [[nodiscard]] auto
+    rd_serialize_log_event(epoch_time_ms_t timestamp, std::string_view message) -> bool;
 
 private:
     // Constants
@@ -122,7 +124,7 @@ private:
     std::vector<int8_t> m_ir_buf;
     FileWriter m_writer;
     streaming_compression::zstd::Compressor m_zstd_compressor;
-    compressor_frontend::RDParser parser;
+    compressor_frontend::RDParser parser{""};
 
     bool m_is_open{false};
 };

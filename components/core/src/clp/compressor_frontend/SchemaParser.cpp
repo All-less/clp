@@ -31,6 +31,10 @@ using RegexASTCatByte = compressor_frontend::finite_automata::RegexASTCat<
 using std::make_unique;
 using std::string;
 using std::unique_ptr;
+using clp::ErrorCode;
+using clp::ErrorCode_Success;
+using clp::ErrorCode_FileNotFound;
+using clp::ErrorCode_errno;
 
 namespace compressor_frontend {
 SchemaParser::SchemaParser() {
@@ -48,8 +52,8 @@ unique_ptr<SchemaFileAST> SchemaParser::generate_schema_ast(ReaderInterface& rea
 }
 
 unique_ptr<SchemaFileAST> SchemaParser::try_schema_file(string const& schema_file_path) {
-    FileReader schema_reader;
-    ErrorCode error_code = schema_reader.try_open(schema_file_path);
+    FileReader schema_reader(schema_file_path);
+    ErrorCode error_code = ErrorCode_Success;
     if (ErrorCode_Success != error_code) {
         if (ErrorCode_FileNotFound == error_code) {
             SPDLOG_ERROR("'{}' does not exist.", schema_file_path);
@@ -62,7 +66,6 @@ unique_ptr<SchemaFileAST> SchemaParser::try_schema_file(string const& schema_fil
     }
     SchemaParser sp;
     unique_ptr<SchemaFileAST> schema_ast = sp.generate_schema_ast(schema_reader);
-    schema_reader.close();
 #ifdef ANDROID
     schema_ast->m_file_path = boost::filesystem::canonical(schema_reader.get_path()).string();
 #else

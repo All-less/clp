@@ -142,7 +142,7 @@ auto LogEventSerializer<encoded_variable_t>::rd_serialize_log_event(
     bool res{};
     auto const buf_size_before_serialization = m_ir_buf.size();
     if constexpr (std::is_same_v<encoded_variable_t, eight_byte_encoded_variable_t>) {
-        res = clp::ffi::ir_stream::eight_byte_encoding::rd_serialize_log_event(
+        res = clp::ffi::ir_stream::eight_byte_encoding::serialize_log_event(
                 timestamp,
                 message,
                 logtype,
@@ -190,6 +190,10 @@ template auto LogEventSerializer<eight_byte_encoded_variable_t>::serialize_log_e
         string_view message
 ) -> bool;
 template auto LogEventSerializer<four_byte_encoded_variable_t>::serialize_log_event(
+        epoch_time_ms_t timestamp,
+        string_view message
+) -> bool;
+template auto LogEventSerializer<four_byte_encoded_variable_t>::rd_serialize_log_event(
         epoch_time_ms_t timestamp,
         string_view message
 ) -> bool;

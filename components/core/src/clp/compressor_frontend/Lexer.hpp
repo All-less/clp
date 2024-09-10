@@ -22,6 +22,7 @@
 using compressor_frontend::finite_automata::RegexAST;
 using compressor_frontend::finite_automata::RegexDFA;
 using compressor_frontend::finite_automata::RegexNFA;
+using clp::ReaderInterface;
 
 namespace compressor_frontend {
 template <typename NFAStateType, typename DFAStateType>
