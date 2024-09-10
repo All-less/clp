@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <vector>
 #include <immintrin.h>
+#include <string_view>
 
 // Project Headers
 #include "Constants.hpp"
@@ -183,6 +184,10 @@ namespace compressor_frontend {
         void read(std::string const& message) {
             m_active_storage = (char*) message.data();
             // std::copy(message.data(), message.data() + message.size(), m_active_storage);
+        }
+
+        void read(std::string_view& message) {
+            m_active_storage = (char*) message.data();
         }
 
 

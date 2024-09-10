@@ -2,6 +2,7 @@
 #define COMPRESSOR_FRONTEND_INPUT_BUFFER_HPP
 
 #include <string>
+#include <string_view>
 
 // Project Headers
 #include "Buffer.hpp"
@@ -37,6 +38,7 @@ namespace compressor_frontend {
          * @param reader
          */
         void read(std::string const& message);
+        void read(std::string_view& message);
 
         /**
          * Reads if only consumed data will be overwritten

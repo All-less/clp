@@ -1,6 +1,7 @@
 // C++ libraries
 #include <memory.h>
 #include <string>
+#include <string_view>
 #include <iostream>
 
 // spdlog
@@ -61,6 +62,11 @@ namespace compressor_frontend {
     void LogInputBuffer::read(std::string const& message) {
         // We assume the length of message is shorter than 60000 (default size of m_storage),
         // so we don't change `m_last_read_first_half`.
+        m_storage.read(message);
+        m_pos_last_read_char += message.size();
+    }
+
+    void LogInputBuffer::read(std::string_view& message) {
         m_storage.read(message);
         m_pos_last_read_char += message.size();
     }
