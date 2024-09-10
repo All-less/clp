@@ -10,7 +10,6 @@
 
 // Project headers
 #include "../FileReader.hpp"
-#include "../spdlog_with_specializations.hpp"
 #include "Constants.hpp"
 #include "finite_automata/RegexAST.hpp"
 
@@ -95,7 +94,7 @@ namespace compressor_frontend {
                 warn += " in file " + dynamic_cast<FileReader*>(m_reader)->get_path();
                 warn += " changing to dynamic buffer and increasing buffer size to ";
                 warn += to_string(m_current_buff_size * 2);
-                SPDLOG_WARN(warn);
+                // SPDLOG_WARN(warn);
                 // Found a super long line: for completeness handle this case, but efficiency doesn't matter
                 // 1. copy everything from old buffer into new buffer
                 if (m_active_byte_buf == m_static_byte_buf) {
@@ -128,11 +127,11 @@ namespace compressor_frontend {
                 m_byte_buf_ptr = &m_active_byte_buf;
                 m_byte_buf_size_ptr = &m_current_buff_size;
                 if (m_active_byte_buf == nullptr) {
-                    SPDLOG_ERROR("failed to allocate byte buffer of size {}", m_current_buff_size);
+                    // SPDLOG_ERROR("failed to allocate byte buffer of size {}", m_current_buff_size);
                     string err = "Lexer failed to find a match after checking entire buffer";
                     err += " at line " + to_string(m_line);
                     err += " in file " + dynamic_cast<FileReader*>(m_reader)->get_path();
-                    throw (err); // this throw allows for continuation of compressing other files 
+                    throw (err); // this throw allows for continuation of compressing other files
                 }
                 m_reader->read(m_active_byte_buf + m_current_buff_size / 2, m_current_buff_size / 2, m_bytes_read);
                 m_bytes_read += m_current_buff_size / 2;
@@ -218,7 +217,7 @@ namespace compressor_frontend {
                 warn += " in file " + dynamic_cast<FileReader*>(m_reader)->get_path();
                 warn += " changing to dynamic buffer and increasing buffer size to ";
                 warn += to_string(m_current_buff_size * 2);
-                SPDLOG_WARN(warn);
+                // SPDLOG_WARN(warn);
                 // Found a super long line: for completeness handle this case, but efficiency doesn't matter
                 // 1. copy everything from old buffer into new buffer
                 if (m_active_byte_buf == m_static_byte_buf) {
@@ -251,11 +250,11 @@ namespace compressor_frontend {
                 m_byte_buf_ptr = &m_active_byte_buf;
                 m_byte_buf_size_ptr = &m_current_buff_size;
                 if (m_active_byte_buf == nullptr) {
-                    SPDLOG_ERROR("failed to allocate byte buffer of size {}", m_current_buff_size);
+                    // SPDLOG_ERROR("failed to allocate byte buffer of size {}", m_current_buff_size);
                     string err = "Lexer failed to find a match after checking entire buffer";
                     err += " at line " + to_string(m_line);
                     err += " in file " + dynamic_cast<FileReader*>(m_reader)->get_path();
-                    throw (err); // this throw allows for continuation of compressing other files 
+                    throw (err); // this throw allows for continuation of compressing other files
                 }
                 m_reader->read(m_active_byte_buf + m_current_buff_size / 2, m_current_buff_size / 2, m_bytes_read);
                 m_bytes_read += m_current_buff_size / 2;
@@ -288,7 +287,7 @@ namespace compressor_frontend {
 
             // !m_at_end_of_file should be impossible
             // m_match_pos != m_byte_buf_pos --> "te matches from "tes*" (means "tes" isn't a match, so is_var = false)
-            // 
+            //
             if (m_at_end_of_file || next == nullptr) {
                 assert(m_at_end_of_file);
 
@@ -423,7 +422,7 @@ namespace compressor_frontend {
         for (const Rule& r: m_rules) {
             r.add_ast(&nfa);
         }
-        
+
         nfa.reverse();
 
         m_dfa = nfa_to_dfa(nfa);

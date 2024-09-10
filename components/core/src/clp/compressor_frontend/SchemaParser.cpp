@@ -7,7 +7,6 @@
 
 // Project headers
 #include "../FileReader.hpp"
-#include "../spdlog_with_specializations.hpp"
 #include "Constants.hpp"
 #include "finite_automata/RegexAST.hpp"
 #include "LALR1Parser.hpp"
@@ -56,11 +55,11 @@ unique_ptr<SchemaFileAST> SchemaParser::try_schema_file(string const& schema_fil
     ErrorCode error_code = ErrorCode_Success;
     if (ErrorCode_Success != error_code) {
         if (ErrorCode_FileNotFound == error_code) {
-            SPDLOG_ERROR("'{}' does not exist.", schema_file_path);
+            // SPDLOG_ERROR("'{}' does not exist.", schema_file_path);
         } else if (ErrorCode_errno == error_code) {
-            SPDLOG_ERROR("Failed to read '{}', errno={}", schema_file_path, errno);
+            // SPDLOG_ERROR("Failed to read '{}', errno={}", schema_file_path, errno);
         } else {
-            SPDLOG_ERROR("Failed to read '{}', error_code={}", schema_file_path, error_code);
+            // SPDLOG_ERROR("Failed to read '{}', error_code={}", schema_file_path, error_code);
         }
         return nullptr;
     }

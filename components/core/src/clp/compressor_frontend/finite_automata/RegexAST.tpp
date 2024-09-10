@@ -10,7 +10,6 @@
 #include <stack>
 
 // Project headers
-#include "../../spdlog_with_specializations.hpp"
 #include "../Constants.hpp"
 #include "RegexNFA.hpp"
 #include "UnicodeIntervalTree.hpp"
@@ -141,7 +140,7 @@ namespace compressor_frontend::finite_automata {
     RegexASTGroup<NFAStateType>::RegexASTGroup (RegexASTGroup<NFAStateType>* left, RegexASTLiteral<NFAStateType>* right) {
         m_is_wildcard = false;
         if (right == nullptr) {
-            SPDLOG_ERROR("A bracket expression in the schema contains illegal characters, remember to escape special characters. "
+            // SPDLOG_ERROR("A bracket expression in the schema contains illegal characters, remember to escape special characters. "
                          "Refer to README-Schema.md for more details.");
             throw runtime_error("RegexASTGroup1: right==nullptr");
         }
@@ -163,7 +162,7 @@ namespace compressor_frontend::finite_automata {
     RegexASTGroup<NFAStateType>::RegexASTGroup (RegexASTLiteral<NFAStateType>* right) {
         m_is_wildcard = false;
         if (right == nullptr) {
-            SPDLOG_ERROR("A bracket expression in the schema contains illegal characters, remember to escape special characters. "
+            // SPDLOG_ERROR("A bracket expression in the schema contains illegal characters, remember to escape special characters. "
                          "Refer to README-Schema.md for more details.");
             throw runtime_error("RegexASTGroup2: right==nullptr");
         }
@@ -183,7 +182,7 @@ namespace compressor_frontend::finite_automata {
     RegexASTGroup<NFAStateType>::RegexASTGroup (RegexASTLiteral<NFAStateType>* left, RegexASTLiteral<NFAStateType>* right) {
         m_is_wildcard = false;
         if (left == nullptr || right == nullptr) {
-            SPDLOG_ERROR("A bracket expression in the schema contains illegal characters, remember to escape special characters. "
+            // SPDLOG_ERROR("A bracket expression in the schema contains illegal characters, remember to escape special characters. "
                          "Refer to README-Schema.md for more details.");
             throw runtime_error("RegexASTGroup3: left == nullptr || right == nullptr");
         }
@@ -256,7 +255,7 @@ namespace compressor_frontend::finite_automata {
         for (const Range& r: merged) {
             nfa->m_root->add_interval(Interval(r.first, r.second), end_state);
         }
-    }    
+    }
 }
 
 #endif // COMPRESSOR_FRONTEND_FINITE_AUTOMATA_REGEX_AST_TPP

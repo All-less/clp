@@ -7,7 +7,6 @@
 // Project headers
 #include "../clp/utils.hpp"
 #include "../streaming_archive/writer/utils.hpp"
-#include "../spdlog_with_specializations.hpp"
 #include "Constants.hpp"
 #include "SchemaParser.hpp"
 
