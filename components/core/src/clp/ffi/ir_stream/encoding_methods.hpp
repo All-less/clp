@@ -4,6 +4,7 @@
 #include <string_view>
 #include <vector>
 
+#include "../../compressor_frontend/RDParser.hpp"
 #include "../../ir/types.hpp"
 #include "../../time_types.hpp"
 #include "../encoding_methods.hpp"
@@ -86,7 +87,8 @@ bool rd_serialize_log_event(
         ir::epoch_time_ms_t timestamp_delta,
         std::string_view message,
         std::string& logtype,
-        std::vector<int8_t>& ir_buf
+        std::vector<int8_t>& ir_buf,
+        compressor_frontend::RDParser& parser
 );
 
 /**

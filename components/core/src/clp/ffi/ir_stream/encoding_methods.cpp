@@ -220,9 +220,10 @@ bool rd_serialize_log_event(
         epoch_time_ms_t timestamp_delta,
         string_view message,
         string& logtype,
-        vector<int8_t>& ir_buf
+        vector<int8_t>& ir_buf,
+        compressor_frontend::RDParser& parser
 ) {
-    if (false == rd_serialize_message(message, logtype, ir_buf)) {
+    if (false == rd_serialize_message(message, logtype, ir_buf, parser)) {
         return false;
     }
 
@@ -258,7 +259,7 @@ bool serialize_message(string_view message, string& logtype, vector<int8_t>& ir_
     return true;
 }
 
-bool rd_serialize_message(string_view message, string& logtype, vector<int8_t>& ir_buf) {
+bool rd_serialize_message(string_view message, string& logtype, vector<int8_t>& ir_buf, compressor_frontend::RDParser& parser) {
     auto encoded_var_handler = [&ir_buf](four_byte_encoded_variable_t encoded_var) {
         ir_buf.push_back(cProtocol::Payload::VarFourByteEncoding);
         serialize_int(encoded_var, ir_buf);
@@ -270,7 +271,8 @@ bool rd_serialize_message(string_view message, string& logtype, vector<int8_t>& 
                 logtype,
                 ir::escape_and_append_const_to_logtype,
                 encoded_var_handler,
-                DictionaryVariableHandler(ir_buf)
+                DictionaryVariableHandler(ir_buf),
+                parser
         ))
     {
         return false;

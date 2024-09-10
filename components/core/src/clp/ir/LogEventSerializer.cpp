@@ -155,7 +155,8 @@ auto LogEventSerializer<encoded_variable_t>::rd_serialize_log_event(
                 timestamp_delta,
                 message,
                 logtype,
-                m_ir_buf
+                m_ir_buf,
+                parser
         );
     }
     if (false == res) {

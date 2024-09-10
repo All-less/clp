@@ -8,6 +8,9 @@
 #include "../ir/parsing.hpp"
 #include "../ir/types.hpp"
 #include "../type_utils.hpp"
+#include "../compressor_frontend/RDParser.hpp"
+#include "../compressor_frontend/LogInputBuffer.hpp"
+#include "../compressor_frontend/LogOutputBuffer.hpp"
 
 namespace clp::ffi {
 template <typename encoded_variable_t>
@@ -402,43 +405,22 @@ bool rd_encode_message_generically(
         std::string& logtype,
         ConstantHandler constant_handler,
         EncodedVariableHandler encoded_variable_handler,
-        DictionaryVariableHandler dictionary_variable_handler
+        DictionaryVariableHandler dictionary_variable_handler,
+        compressor_frontend::RDParser& parser
 ) {
-    size_t var_begin_pos = 0;
-    size_t var_end_pos = 0;
-    size_t constant_begin_pos = 0;
-    logtype.clear();
-    logtype.reserve(message.length());
-    while (ir::get_bounds_of_next_var(message, var_begin_pos, var_end_pos)) {
-        std::string_view constant{&message[constant_begin_pos], var_begin_pos - constant_begin_pos};
-        constant_handler(constant, logtype);
-        constant_begin_pos = var_end_pos;
+    compressor_frontend::LogInputBuffer buffer;
+    buffer.read(message);
 
-        // Encode the variable
-        std::string_view var_string{&message[var_begin_pos], var_end_pos - var_begin_pos};
-        encoded_variable_t encoded_variable;
-        if (encode_float_string(var_string, encoded_variable)) {
-            logtype += enum_to_underlying_type(ir::VariablePlaceholder::Float);
-            encoded_variable_handler(encoded_variable);
-        } else if (encode_integer_string(var_string, encoded_variable)) {
-            logtype += enum_to_underlying_type(ir::VariablePlaceholder::Integer);
-            encoded_variable_handler(encoded_variable);
-        } else {
-            logtype += enum_to_underlying_type(ir::VariablePlaceholder::Dictionary);
-            if (false == dictionary_variable_handler(message, var_begin_pos, var_end_pos)) {
-                return false;
-            }
-        }
-    }
-    // Append any remaining message content to the logtype
-    if (constant_begin_pos < message.length()) {
-        std::string_view constant{
-                &message[constant_begin_pos],
-                message.length() - constant_begin_pos
-        };
-        constant_handler(constant, logtype);
-    }
+    compressor_frontend::LogOutputBuffer output;
+    output.set_token_callback([&logtype_dict_entry, &var_dict, &var_ids, &encoded_vars](std::string token, size_t type_id) {
+        encoded_variable_t encoded_var{0};
+        // encoded_var = encode_var_dict_id(add_dict_var(token, logtype_dict_entry, var_dict, var_ids));
+        encoded_var = encode_var(token, logtype_dict_entry, var_dict, var_ids);
+        encoded_vars.push_back(encoded_var);
+    });
+    output.reset();
 
+    parser.parse_new(buffer, output);
     return true;
 }
 
