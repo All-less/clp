@@ -188,6 +188,7 @@ namespace compressor_frontend {
 
         void read(std::string_view& message) {
             m_active_storage = (char*) message.data();
+	    // std::copy(message.data(), message.data() + message.size(), m_active_storage);
         }
 
 

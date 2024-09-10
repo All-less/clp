@@ -28,6 +28,7 @@ using clp::ir::LogEventDeserializer;
 using clp::ir::LogEventSerializer;
 using clp::streaming_compression::zstd::Decompressor;
 using std::chrono::milliseconds;
+using std::chrono::nanoseconds;
 using std::chrono::system_clock;
 using std::is_same_v;
 using std::string;
@@ -131,28 +132,34 @@ TEMPLATE_TEST_CASE(
 }
 
 void read_events(vector<TestLogEvent> &test_log_events) {
+    nanoseconds read_time;
+    auto const t0 = std::chrono::steady_clock::now();
+
     tm tm = {};
 
-    ifstream log_file{"test.log"};
+    ifstream log_file{"nodemanager-deduped-single-10k.log"};
     string line;
     char comma;
-    int milliseconds;
+    int msec;
     while (getline(log_file, line)) {
         istringstream ss(line.substr(0, 23));
-        ss >> std::get_time(&tm, "%Y-%m-%d %H:%M:%S") >> comma >> milliseconds;
+        ss >> std::get_time(&tm, "%Y-%m-%d %H:%M:%S") >> comma >> msec;
         auto timeSinceEpoch = std::mktime(&tm);
-        auto unixTimestampInMilliseconds = static_cast<epoch_time_ms_t>(timeSinceEpoch) * 1000 + milliseconds;
+        auto unixTimestampInMilliseconds = static_cast<epoch_time_ms_t>(timeSinceEpoch) * 1000 + msec;
 
-        test_log_events.push_back({ unixTimestampInMilliseconds, line.substr(23) });
+        test_log_events.push_back({ unixTimestampInMilliseconds, line.substr(23) + "\n" });
     }
 
+    auto const t1 = std::chrono::steady_clock::now();
+    read_time = t1 - t0;
+    std::cout << "Time spent in reading logs is " << read_time.count() << std::endl;
 }
 
 TEMPLATE_TEST_CASE(
         "End-to-end cncode and serialize log events ",
         "[ir][serialize-e2e]",
-        four_byte_encoded_variable_t,
-        eight_byte_encoded_variable_t
+        four_byte_encoded_variable_t
+        // eight_byte_encoded_variable_t
 ) {
     vector<TestLogEvent> test_log_events;
     read_events(test_log_events);

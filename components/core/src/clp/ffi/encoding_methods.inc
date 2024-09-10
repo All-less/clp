@@ -2,6 +2,7 @@
 #define CLP_FFI_ENCODING_METHODS_INC
 
 #include <algorithm>
+#include <iostream>
 
 #include <string_utils/string_utils.hpp>
 
@@ -413,7 +414,7 @@ bool rd_encode_message_generically(
 
     compressor_frontend::LogOutputBuffer output;
     output.set_token_callback([&dictionary_variable_handler](std::string token, size_t type_id) {
-        dictionary_variable_handler(token, 0, token.size());
+        // dictionary_variable_handler(token, 0, token.size());
     });
     output.reset();
 

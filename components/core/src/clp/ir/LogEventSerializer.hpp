@@ -124,7 +124,7 @@ private:
     std::vector<int8_t> m_ir_buf;
     FileWriter m_writer;
     streaming_compression::zstd::Compressor m_zstd_compressor;
-    compressor_frontend::RDParser parser{""};
+    compressor_frontend::RDParser parser{"/mnt/clp/components/core/tests/test_state_files"};
 
     bool m_is_open{false};
 };

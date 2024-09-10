@@ -100,11 +100,11 @@ namespace compressor_frontend {
                 if (m_active_byte_buf == m_static_byte_buf) {
                     m_active_byte_buf = (char*) malloc(m_current_buff_size * sizeof(char));
                     if (m_fail_pos == 0) {
-                        memcpy(m_active_byte_buf, m_static_byte_buf, sizeof(m_static_byte_buf));
+                        // memcpy(m_active_byte_buf, m_static_byte_buf, sizeof(m_static_byte_buf));
                     } else {
                         /// TODO: make a test case for this scenario
-                        memcpy(m_active_byte_buf, m_static_byte_buf + sizeof(m_static_byte_buf) / 2, sizeof(m_static_byte_buf) / 2);
-                        memcpy(m_active_byte_buf + sizeof(m_static_byte_buf) / 2, m_static_byte_buf, sizeof(m_static_byte_buf) / 2);
+                        // memcpy(m_active_byte_buf, m_static_byte_buf + sizeof(m_static_byte_buf) / 2, sizeof(m_static_byte_buf) / 2);
+                        // memcpy(m_active_byte_buf + sizeof(m_static_byte_buf) / 2, m_static_byte_buf, sizeof(m_static_byte_buf) / 2);
                         if (m_match_pos >= m_current_buff_size / 2) {
                             m_match_pos -= m_current_buff_size / 2;
                         } else {
@@ -223,11 +223,11 @@ namespace compressor_frontend {
                 if (m_active_byte_buf == m_static_byte_buf) {
                     m_active_byte_buf = (char*) malloc(m_current_buff_size * sizeof(char));
                     if (m_fail_pos == 0) {
-                        memcpy(m_active_byte_buf, m_static_byte_buf, sizeof(m_static_byte_buf));
+                        // memcpy(m_active_byte_buf, m_static_byte_buf, sizeof(m_static_byte_buf));
                     } else {
                         /// TODO: make a test case for this scenario
-                        memcpy(m_active_byte_buf, m_static_byte_buf + sizeof(m_static_byte_buf) / 2, sizeof(m_static_byte_buf) / 2);
-                        memcpy(m_active_byte_buf + sizeof(m_static_byte_buf) / 2, m_static_byte_buf, sizeof(m_static_byte_buf) / 2);
+                        // memcpy(m_active_byte_buf, m_static_byte_buf + sizeof(m_static_byte_buf) / 2, sizeof(m_static_byte_buf) / 2);
+                        // memcpy(m_active_byte_buf + sizeof(m_static_byte_buf) / 2, m_static_byte_buf, sizeof(m_static_byte_buf) / 2);
                         if (m_match_pos >= m_current_buff_size / 2) {
                             m_match_pos -= m_current_buff_size / 2;
                         } else {

@@ -141,7 +141,7 @@ namespace compressor_frontend::finite_automata {
         m_is_wildcard = false;
         if (right == nullptr) {
             // SPDLOG_ERROR("A bracket expression in the schema contains illegal characters, remember to escape special characters. "
-                         "Refer to README-Schema.md for more details.");
+            //              "Refer to README-Schema.md for more details.");
             throw runtime_error("RegexASTGroup1: right==nullptr");
         }
         m_negate = left->m_negate;
@@ -163,7 +163,7 @@ namespace compressor_frontend::finite_automata {
         m_is_wildcard = false;
         if (right == nullptr) {
             // SPDLOG_ERROR("A bracket expression in the schema contains illegal characters, remember to escape special characters. "
-                         "Refer to README-Schema.md for more details.");
+            //              "Refer to README-Schema.md for more details.");
             throw runtime_error("RegexASTGroup2: right==nullptr");
         }
         m_negate = false;
@@ -183,7 +183,7 @@ namespace compressor_frontend::finite_automata {
         m_is_wildcard = false;
         if (left == nullptr || right == nullptr) {
             // SPDLOG_ERROR("A bracket expression in the schema contains illegal characters, remember to escape special characters. "
-                         "Refer to README-Schema.md for more details.");
+            //              "Refer to README-Schema.md for more details.");
             throw runtime_error("RegexASTGroup3: left == nullptr || right == nullptr");
         }
         m_negate = false;
