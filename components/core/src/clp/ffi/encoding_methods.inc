@@ -412,11 +412,8 @@ bool rd_encode_message_generically(
     buffer.read(message);
 
     compressor_frontend::LogOutputBuffer output;
-    output.set_token_callback([&logtype_dict_entry, &var_dict, &var_ids, &encoded_vars](std::string token, size_t type_id) {
-        encoded_variable_t encoded_var{0};
-        // encoded_var = encode_var_dict_id(add_dict_var(token, logtype_dict_entry, var_dict, var_ids));
-        encoded_var = encode_var(token, logtype_dict_entry, var_dict, var_ids);
-        encoded_vars.push_back(encoded_var);
+    output.set_token_callback([](std::string token, size_t type_id) {
+        dictionary_variable_handler(token, 0, token.size());
     });
     output.reset();
 
