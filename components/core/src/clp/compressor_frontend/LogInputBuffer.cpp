@@ -73,7 +73,7 @@ namespace compressor_frontend {
 
     RDToken LogInputBuffer::read_n(uint32_t n) {
         RDToken res;
-        if (m_storage.pos() + n < m_storage.size()) {
+        /* if (m_storage.pos() + n < m_storage.size()) {
             res = RDToken{m_storage.pos(), m_storage.pos() + n,
                           m_storage.get_active_buffer(), m_storage.size(),
                           0, dummy_type_ids};
@@ -81,7 +81,7 @@ namespace compressor_frontend {
             res = RDToken{m_storage.pos(), m_storage.pos() + n - m_storage.size(),
                           m_storage.get_active_buffer(), m_storage.size(),
                           0, dummy_type_ids};
-	    }
+	    } */
         skip_offset_without_callback(n);
         return res;
     }

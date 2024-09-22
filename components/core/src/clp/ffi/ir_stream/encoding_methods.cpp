@@ -1,5 +1,8 @@
 #include "encoding_methods.hpp"
 
+#include <chrono>
+#include <ctime>
+#include <iostream>
 #include <json/single_include/nlohmann/json.hpp>
 
 #include "../../ir/parsing.hpp"
@@ -16,6 +19,13 @@ using std::string_view;
 using std::vector;
 
 namespace clp::ffi::ir_stream {
+
+std::chrono::nanoseconds insert_time;
+
+void print_insert_time() {
+    std::cout << "Time spent in inserting is " << insert_time.count() << std::endl;
+}
+
 // Local function prototypes
 /**
  * Serializes the given logtype into the IR stream
@@ -88,7 +98,10 @@ static bool serialize_logtype(string_view logtype, vector<int8_t>& ir_buf) {
         // Logtype is too long for encoding
         return false;
     }
+    auto const t0 = std::chrono::steady_clock::now();
     ir_buf.insert(ir_buf.cend(), logtype.cbegin(), logtype.cend());
+    auto const t1 = std::chrono::steady_clock::now();
+    insert_time += t1 - t0;
     return true;
 }
 

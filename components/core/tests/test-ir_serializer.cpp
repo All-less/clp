@@ -13,6 +13,7 @@
 #include <Catch2/single_include/catch2/catch.hpp>
 
 #include "../src/clp/ffi/ir_stream/decoding_methods.hpp"
+#include "../src/clp/ffi/ir_stream/encoding_methods.hpp"
 #include "../src/clp/ir/constants.hpp"
 #include "../src/clp/ir/LogEventDeserializer.hpp"
 #include "../src/clp/ir/LogEventSerializer.hpp"
@@ -137,7 +138,7 @@ void read_events(vector<TestLogEvent> &test_log_events) {
 
     tm tm = {};
 
-    ifstream log_file{"nodemanager-deduped-single-10k.log"};
+    ifstream log_file{"/mnt/clp/components/core/build/nodemanager-deduped-single.log"};
     string line;
     char comma;
     int msec;
@@ -172,7 +173,15 @@ TEMPLATE_TEST_CASE(
     for (auto const& test_log_event : test_log_events) {
         REQUIRE(serializer.serialize_log_event(test_log_event.timestamp, test_log_event.msg));
     }
+    std::cout << "Serialized size is " << serializer.get_serialized_size() << std::endl;
+    clp::ffi::ir_stream::print_insert_time();
+
+    nanoseconds write_time;
+    auto const t0 = std::chrono::steady_clock::now();
     serializer.close();
+    auto const t1 = std::chrono::steady_clock::now();
+    write_time = t1 - t0;
+    std::cout << "Time spent writing IR is " << write_time.count() << std::endl;
 }
 
 TEMPLATE_TEST_CASE(
@@ -192,5 +201,13 @@ TEMPLATE_TEST_CASE(
     for (auto const& test_log_event : test_log_events) {
         REQUIRE(serializer.rd_serialize_log_event(test_log_event.timestamp, test_log_event.msg));
     }
+    std::cout << "Serialized size is " << serializer.get_serialized_size() << std::endl;
+    clp::ffi::ir_stream::print_insert_time();
+
+    nanoseconds write_time;
+    auto const t0 = std::chrono::steady_clock::now();
     serializer.close();
+    auto const t1 = std::chrono::steady_clock::now();
+    write_time = t1 - t0;
+    std::cout << "Time spent writing IR is " << write_time.count() << std::endl;
 }

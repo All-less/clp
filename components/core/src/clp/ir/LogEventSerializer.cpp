@@ -34,6 +34,8 @@ auto LogEventSerializer<encoded_variable_t>::open(string const& file_path) -> bo
     m_num_log_events = 0;
     m_ir_buf.clear();
 
+    m_ir_buf.reserve(13e7);
+
     m_writer.open(file_path, FileWriter::OpenMode::CREATE_FOR_WRITING);
     m_zstd_compressor.open(m_writer);
 

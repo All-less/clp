@@ -197,7 +197,7 @@ namespace compressor_frontend {
         uint32_t m_active_size;
         Item* m_active_storage;
         std::vector<Item*> m_dynamic_storages;
-        Item m_static_storage[cStaticByteBuffSize];
+        Item m_static_storage[4];
 
         __m256i m_spaces;
         __m256i m_newlines;

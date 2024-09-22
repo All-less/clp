@@ -3,6 +3,8 @@
 
 #include <string_view>
 #include <vector>
+#include <chrono>
+#include <iostream>
 
 #include "../../compressor_frontend/RDParser.hpp"
 #include "../../ir/types.hpp"
@@ -10,6 +12,9 @@
 #include "../encoding_methods.hpp"
 
 namespace clp::ffi::ir_stream {
+
+void print_insert_time();
+
 namespace eight_byte_encoding {
 /**
  * Serializes the preamble for the eight-byte encoding IR stream
