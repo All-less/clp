@@ -105,10 +105,10 @@ namespace compressor_frontend {
         void skip_offset(uint32_t n);
         void skip_offset_without_callback(uint32_t n);
         char peek_offset(uint32_t n);
-        RDToken read_n(uint32_t n);
-        RDToken read_token();
-        RDToken read_until_space();
-        RDToken read_until_newline();
+        void read_n(uint32_t n);
+        void read_token();
+        void read_until_space();
+        void read_until_newline();
 
         int get_total_scanned() {
             return m_total_scanned;
@@ -116,6 +116,18 @@ namespace compressor_frontend {
 
         void set_skip_callback(std::function<void(std::string)> callback) {
             m_skip_callback = callback;
+        }
+
+        void set_token_callback(std::function<void(const char*, size_t, size_t)> callback) {
+            m_token_callback = callback;
+        }
+
+        void set_type_id(size_t type_id) {
+            m_type_id = type_id;
+        }
+
+        size_t get_type_id() {
+            return m_type_id;
         }
 
     private:
@@ -140,6 +152,9 @@ namespace compressor_frontend {
         int m_total_scanned;
 
         std::function<void(std::string)> m_skip_callback;
+        std::function<void(const char*, size_t, size_t)> m_token_callback;
+
+        size_t m_type_id;
     };
 }
 

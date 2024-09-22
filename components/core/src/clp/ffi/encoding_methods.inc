@@ -411,15 +411,12 @@ bool rd_encode_message_generically(
 ) {
     compressor_frontend::LogInputBuffer buffer;
     buffer.read(message);
-
-    compressor_frontend::LogOutputBuffer output;
-    output.set_token_callback([&dictionary_variable_handler](std::string token, size_t type_id) {
-        dictionary_variable_handler(token, 0, token.size());
+    buffer.set_token_callback([&dictionary_variable_handler](const char* buffer, size_t begin_pos, size_t end_pos) {
+        dictionary_variable_handler(buffer, begin_pos, end_pos);
     });
-    output.reset();
 
     logtype += "DEBUG org.apache.hadoop.ipc.Client: IPC Client (589610983) connection to master/172.18.0.2:8031 from root sending #69912 org.apache.hadoop.yarn.server.api.ResourceTrackerPB.nodeHeartbeat";
-    parser.parse_new(buffer, output);
+    parser.parse_new(buffer);
     return true;
 }
 

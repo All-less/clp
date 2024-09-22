@@ -79,50 +79,32 @@ namespace compressor_frontend {
     }
 
     /**
-     * Parse a single log message from input_buffer and store results to output_buffer.
+     * Parse a single log message from input_buffer.
      *
      * @param ib
-     * @param ob
-     * @return
      */
-    ParsingAction RDParser::parse_new(LogInputBuffer &ib, LogOutputBuffer &ob) {
-
-        // if (spec_mode) {
-        //     try {
-        //         spec_parse(ib, ob);
-        //     } catch (SpecParsingError) {
-        //         ib.rewind();
-        //         ob.reset();
-        //         scan_parse(ib, ob);
-        //     }
-        // } else {
-        //     scan_parse(ib, ob);
-        // }
-
-        // ib.commit();
-
-	spec_parse(ib, ob);
-        return ParsingAction::None;
+    void RDParser::parse_new(LogInputBuffer &ib) {
+	    spec_parse(ib);
     }
 
-    void RDParser::spec_parse(LogInputBuffer &ib, LogOutputBuffer &ob) {
-        parse_metadata(ib, ob);
-        detect_type(ib, ob);
-        parse_variables(ib, ob);
-        validate(ib, ob);
+    void RDParser::spec_parse(LogInputBuffer &ib) {
+        parse_metadata(ib);
+        detect_type(ib);
+        parse_variables(ib);
+        validate(ib);
     }
 
-    void RDParser::scan_parse(LogInputBuffer &ib, LogOutputBuffer &ob) {
+    void RDParser::scan_parse(LogInputBuffer &ib) {
 
-        // parse_metadata(ib, ob);
+        // parse_metadata(ib);
 
-        // learner.ingest_parse(ib, ob);
+        // learner.ingest_parse(ib);
 
         // learner.gen_parsing_tables();
         // read_states("/mnt/clp/scripts/parsing_states.txt");
     }
 
-    void RDParser::parse_metadata(LogInputBuffer &ib, LogOutputBuffer &ob) {
+    void RDParser::parse_metadata(LogInputBuffer &ib) {
         const Action8 BITMASK       = 1 << 7,
                       SCAN_WIDTH    = 1 << 7,
                       SCAN_TO_SPACE = 0 << 7;
@@ -133,19 +115,19 @@ namespace compressor_frontend {
                 case SCAN_WIDTH: {
                     auto width = (size_t) (action & ~BITMASK);
                     // std::cout << "width: " << width << std::endl;
-                    read_n(ib, ob, width);
+                    read_n(ib, width);
                     ib.skip_offset(1);
                     break;
                 }
                 case SCAN_TO_SPACE:
-                    read_token(ib, ob);
+                    read_token(ib);
                     ib.skip_offset(1);
                     break;
             }
         }
     }
 
-    void RDParser::detect_type(LogInputBuffer &ib, LogOutputBuffer &ob) {
+    void RDParser::detect_type(LogInputBuffer &ib) {
         const Action16 ACTION_FLAG_MASK = 1 << 15,
                        ADD_OFFSET       = 0 << 15,
                        EXTRACT_BITS     = 1 << 15;
@@ -178,9 +160,9 @@ namespace compressor_frontend {
                     break;
                 case EXTRACT_BITS:
                     if (val == 0) {  // all-zero bitmask means "scan_token next variable"
-                        parse_part(ib, ob, table);
+                        parse_part(ib, table);
                         table = type_parsing[pos];
-                        read_token(ib, ob);
+                        read_token(ib);
                         continue;
                     } else {
                         e = _pext_u32(ib.peek_offset(pos), val);
@@ -199,12 +181,12 @@ namespace compressor_frontend {
                     break;
                 case FOUND_TYPE:
                     // std::cout << "FOUND_TYPE: " << val << std::endl;
-                    ob.set_type(val);
+                    ib.set_type_id(val);
                     goto FOUND;
                 case NEXT_TOKEN:
                     // std::cout << "NEXT_TOKEN: " << val << std::endl;
                     ib.skip_offset(val);
-                    read_token(ib, ob);
+                    read_token(ib);
                     break;
                 default:
                     throw std::runtime_error("Encountered invalid entry in type table.");
@@ -215,7 +197,7 @@ FOUND:
         return;
     }
 
-    void RDParser::parse_part(LogInputBuffer &ib, LogOutputBuffer &ob, LookupTable &table) {
+    void RDParser::parse_part(LogInputBuffer &ib, LookupTable &table) {
         const Action16 FLAG_MASK = 0b1 << 15,
                        SKIP      = 0b1 << 15,
                        READ      = 0b0 << 15;
@@ -233,13 +215,13 @@ FOUND:
                     break;
                 case READ:
                     // std::cout << "READ: " << val << std::endl;
-                    read_n(ib, ob, val);
+                    read_n(ib, val);
                     break;
             }
         }
     }
 
-    void RDParser::parse_variables(LogInputBuffer &ib, LogOutputBuffer &ob) {
+    void RDParser::parse_variables(LogInputBuffer &ib) {
         const Action16 FLAG_MASK = 0b11 << 14,
                        SKIP      = 0b00 << 14,
                        READ_VAR  = 0b01 << 14,
@@ -257,7 +239,7 @@ FOUND:
         //      READ_VAR 01XX_XXXX XXXX_XXXX
         //      SCAN_VAR 1100_0000
 
-        for (auto &&action : var_parsing[ob.get_type()]) {
+        for (auto &&action : var_parsing[ib.get_type_id()]) {
             auto val = action & VALUE_MASK;
 
             // std::cout << "action: " << std::bitset<16>(action) << std::endl;
@@ -269,19 +251,19 @@ FOUND:
                     break;
                 case READ_VAR:
                     // std::cout << "READ FIXED_LEN VAR: " << val << std::endl;
-                    read_n(ib, ob, val);
+                    read_n(ib, val);
                     break;
                 case SCAN_VAR:
                     // std::cout << "SACN VAR" << std::endl;
                     switch (action & SCAN_TYPE_MASK) {
                         case SCAN_READABLE:
-                            read_token(ib, ob);
+                            read_token(ib);
                             break;
                         case SCAN_UNTIL_SPACE:
-                            read_until_space(ib, ob);
+                            read_until_space(ib);
                             break;
                         case SCAN_UNTIL_NEWLINE:
-                            read_until_newline(ib, ob);
+                            read_until_newline(ib);
                             break;
                     }
                     break;
@@ -291,35 +273,27 @@ FOUND:
         }
     }
 
-    void RDParser::validate(LogInputBuffer &ib, LogOutputBuffer &ob) {
+    void RDParser::validate(LogInputBuffer &ib) {
 
     }
 
-    void RDParser::read_n(LogInputBuffer &ib, LogOutputBuffer &ob, size_t n) {
-        auto token = ib.read_n(n);
-        ob.set_curr_token(token);
-        ob.advance_to_next_token();
+    void RDParser::read_n(LogInputBuffer &ib, size_t n) {
+        ib.read_n(n);
     }
 
-    void RDParser::read_until_space(LogInputBuffer &ib, LogOutputBuffer &ob) {
-        auto token = ib.read_until_space();
-        ob.set_curr_token(token);
-        ob.advance_to_next_token();
+    void RDParser::read_until_space(LogInputBuffer &ib) {
+        ib.read_until_space();
     }
 
-    void RDParser::read_until_newline(LogInputBuffer &ib, LogOutputBuffer &ob) {
-        auto token = ib.read_until_newline();
-        ob.set_curr_token(token);
-        ob.advance_to_next_token();
+    void RDParser::read_until_newline(LogInputBuffer &ib) {
+        ib.read_until_newline();
     }
 
-    void RDParser::read_token(LogInputBuffer &ib, LogOutputBuffer &ob) {
-        auto token = ib.read_token();
-        ob.set_curr_token(token);
-        ob.advance_to_next_token();
+    void RDParser::read_token(LogInputBuffer &ib) {
+        ib.read_token();
     }
 
-    bool RDParser::init(LogInputBuffer &ib, LogOutputBuffer &ob) {
+    bool RDParser::init(LogInputBuffer &ib) {
         return false;
     }
 }

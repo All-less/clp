@@ -25,6 +25,7 @@ namespace compressor_frontend {
         dummy_type_ids = new std::vector<int>{ 0 };
         m_total_scanned = 0;
         m_skip_callback = nullptr;
+        m_type_id = -1;
     }
 
     bool LogInputBuffer::read_is_safe () {
@@ -71,22 +72,14 @@ namespace compressor_frontend {
         m_pos_last_read_char += message.size();
     }
 
-    RDToken LogInputBuffer::read_n(uint32_t n) {
-        RDToken res;
-        /* if (m_storage.pos() + n < m_storage.size()) {
-            res = RDToken{m_storage.pos(), m_storage.pos() + n,
-                          m_storage.get_active_buffer(), m_storage.size(),
-                          0, dummy_type_ids};
-        } else {
-            res = RDToken{m_storage.pos(), m_storage.pos() + n - m_storage.size(),
-                          m_storage.get_active_buffer(), m_storage.size(),
-                          0, dummy_type_ids};
-	    } */
+    void LogInputBuffer::read_n(uint32_t n) {
+        if (m_token_callback != nullptr) {
+            m_token_callback(m_storage.get_active_buffer(), m_storage.pos(), m_storage.pos() + n);
+        }
         skip_offset_without_callback(n);
-        return res;
     }
 
-    RDToken LogInputBuffer::read_token() {
+    void LogInputBuffer::read_token() {
         const unsigned short SCANNING       = 0 << 8,
                              IN_PARENTHESES = 1 << 8,
                              IN_BRACKETS    = 2 << 8,
@@ -130,17 +123,17 @@ namespace compressor_frontend {
             }
         }
 END_SCANNING:
-        return read_n(i);
+        read_n(i);
     }
 
-    RDToken LogInputBuffer::read_until_space() {
+    void LogInputBuffer::read_until_space() {
         auto n = m_storage.find_space();
         m_total_scanned += n;
-        return read_n(n);
+        read_n(n);
     }
 
-    RDToken LogInputBuffer::read_until_newline() {
-        return read_n(m_storage.find_newline());
+    void LogInputBuffer::read_until_newline() {
+        read_n(m_storage.find_newline());
     }
 
     void LogInputBuffer::skip_offset(uint32_t n) {

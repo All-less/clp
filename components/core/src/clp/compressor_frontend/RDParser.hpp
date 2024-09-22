@@ -41,8 +41,8 @@ namespace compressor_frontend {
 
         RDParser(char const *states_file);
 
-        bool init(LogInputBuffer &ib, LogOutputBuffer &ob);
-        ParsingAction parse_new(LogInputBuffer &ib, LogOutputBuffer &ob);
+        bool init(LogInputBuffer &ib);
+        void parse_new(LogInputBuffer &ib);
 
         void read_states(char const *states_dir);
         void read_parser_states(char const *states_file);
@@ -56,19 +56,19 @@ namespace compressor_frontend {
         std::vector<LookupTable> type_parsing;
         std::vector<std::list<Action16>> var_parsing;
 
-        void scan_parse(LogInputBuffer &ib, LogOutputBuffer &ob);
-        void spec_parse(LogInputBuffer &ib, LogOutputBuffer &ob);
+        void scan_parse(LogInputBuffer &ib);
+        void spec_parse(LogInputBuffer &ib);
 
-        void parse_metadata(LogInputBuffer &ib, LogOutputBuffer &ob);
-        void detect_type(LogInputBuffer &ib, LogOutputBuffer &ob);
-        void parse_part(LogInputBuffer &ib, LogOutputBuffer &ob, LookupTable &table);
-        void parse_variables(LogInputBuffer &ib, LogOutputBuffer &ob);
-        void validate(LogInputBuffer &ib, LogOutputBuffer &ob);
+        void parse_metadata(LogInputBuffer &ib);
+        void detect_type(LogInputBuffer &ib);
+        void parse_part(LogInputBuffer &ib, LookupTable &table);
+        void parse_variables(LogInputBuffer &ib);
+        void validate(LogInputBuffer &ib);
 
-        void read_n(LogInputBuffer &ib, LogOutputBuffer &ob, size_t n);
-        void read_token(LogInputBuffer &ib, LogOutputBuffer &ob);
-        void read_until_space(LogInputBuffer &ib, LogOutputBuffer &ob);
-        void read_until_newline(LogInputBuffer &ib, LogOutputBuffer &ob);
+        void read_n(LogInputBuffer &ib, size_t n);
+        void read_token(LogInputBuffer &ib);
+        void read_until_space(LogInputBuffer &ib);
+        void read_until_newline(LogInputBuffer &ib);
     };
 }
 #endif //COMPRESSOR_FRONTEND_RDPARSER_HPP
