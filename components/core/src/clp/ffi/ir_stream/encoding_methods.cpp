@@ -61,16 +61,6 @@ public:
     explicit DictionaryVariableHandler(vector<int8_t>& ir_buf) : m_ir_buf(ir_buf) {}
 
     bool operator()(string_view message, size_t begin_pos, size_t end_pos) {
-        return insert(message.begin(), begin_pos, end_pos);
-    }
-
-    bool operator()(const char* buffer, uint32_t begin_pos, uint32_t end_pos) {
-        return insert(std::begin(buffer), begin_pos, end_pos);
-    }
-
-private:
-
-    bool insert(string::iterator& message_begin, size_t begin_pos, size_t end_pos) {
         auto length = end_pos - begin_pos;
         if (length <= UINT8_MAX) {
             m_ir_buf.push_back(cProtocol::Payload::VarStrLenUByte);
@@ -84,10 +74,12 @@ private:
         } else {
             return false;
         }
+	auto message_begin = message.cbegin();
         m_ir_buf.insert(m_ir_buf.cend(), message_begin + begin_pos, message_begin + end_pos);
         return true;
     }
 
+private:
     vector<int8_t>& m_ir_buf;
 };
 
@@ -106,10 +98,10 @@ static bool serialize_logtype(string_view logtype, vector<int8_t>& ir_buf) {
         // Logtype is too long for encoding
         return false;
     }
-    auto const t0 = std::chrono::steady_clock::now();
+    // auto const t0 = std::chrono::steady_clock::now();
     ir_buf.insert(ir_buf.cend(), logtype.cbegin(), logtype.cend());
-    auto const t1 = std::chrono::steady_clock::now();
-    insert_time += t1 - t0;
+    // auto const t1 = std::chrono::steady_clock::now();
+    // insert_time += t1 - t0;
     return true;
 }
 

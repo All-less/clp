@@ -415,7 +415,7 @@ bool rd_encode_message_generically(
         dictionary_variable_handler(buffer, begin_pos, end_pos);
     });
 
-    logtype += "DEBUG org.apache.hadoop.ipc.Client: IPC Client (589610983) connection to master/172.18.0.2:8031 from root sending #69912 org.apache.hadoop.yarn.server.api.ResourceTrackerPB.nodeHeartbeat";
+    logtype += "DEBUG org.apache.hadoop.ipc.Client: IPC Client (589610983) connection to master/172.18.0.2:8031 from r";
     parser.parse_new(buffer);
     return true;
 }

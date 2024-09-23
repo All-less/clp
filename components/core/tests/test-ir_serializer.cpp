@@ -170,17 +170,25 @@ TEMPLATE_TEST_CASE(
 
     LogEventSerializer<TestType> serializer;
     REQUIRE(serializer.open(ir_test_file));
+
+    nanoseconds serializing_time;
+    auto const t0 = std::chrono::steady_clock::now();
+    for (auto i = 0; i < 10; i++) {
     for (auto const& test_log_event : test_log_events) {
         REQUIRE(serializer.serialize_log_event(test_log_event.timestamp, test_log_event.msg));
     }
+    }
+    auto const t1 = std::chrono::steady_clock::now();
+    serializing_time = t1 - t0;
+    std::cout << "Time spent serializing log events is " << serializing_time.count() << std::endl;
+
     std::cout << "Serialized size is " << serializer.get_serialized_size() << std::endl;
-    clp::ffi::ir_stream::print_insert_time();
 
     nanoseconds write_time;
-    auto const t0 = std::chrono::steady_clock::now();
+    auto const t2 = std::chrono::steady_clock::now();
     serializer.close();
-    auto const t1 = std::chrono::steady_clock::now();
-    write_time = t1 - t0;
+    auto const t3 = std::chrono::steady_clock::now();
+    write_time = t3 - t2;
     std::cout << "Time spent writing IR is " << write_time.count() << std::endl;
 }
 
@@ -198,16 +206,24 @@ TEMPLATE_TEST_CASE(
 
     LogEventSerializer<TestType> serializer;
     REQUIRE(serializer.open(ir_test_file));
+
+    nanoseconds serializing_time;
+    auto const t0 = std::chrono::steady_clock::now();
+    for (auto i = 0; i < 10; i++) {
     for (auto const& test_log_event : test_log_events) {
         REQUIRE(serializer.rd_serialize_log_event(test_log_event.timestamp, test_log_event.msg));
     }
+    }
+    auto const t1 = std::chrono::steady_clock::now();
+    serializing_time = t1 - t0;
+    std::cout << "Time spent serializing log events is " << serializing_time.count() << std::endl;
+
     std::cout << "Serialized size is " << serializer.get_serialized_size() << std::endl;
-    clp::ffi::ir_stream::print_insert_time();
 
     nanoseconds write_time;
-    auto const t0 = std::chrono::steady_clock::now();
+    auto const t2 = std::chrono::steady_clock::now();
     serializer.close();
-    auto const t1 = std::chrono::steady_clock::now();
-    write_time = t1 - t0;
+    auto const t3 = std::chrono::steady_clock::now();
+    write_time = t3 - t2;
     std::cout << "Time spent writing IR is " << write_time.count() << std::endl;
 }
