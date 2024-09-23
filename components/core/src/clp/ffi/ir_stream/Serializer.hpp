@@ -12,6 +12,7 @@
 #include "../../time_types.hpp"
 #include "../SchemaTree.hpp"
 #include "../SchemaTreeNode.hpp"
+#include "IRBuffer.hpp"
 
 namespace clp::ffi::ir_stream {
 /**
@@ -119,7 +120,7 @@ private:
     serialize_val(msgpack::object const& val, SchemaTreeNode::Type schema_tree_node_type) -> bool;
 
     UtcOffset m_curr_utc_offset{0};
-    Buffer m_ir_buf;
+    IRBuffer m_ir_buf;
     SchemaTree m_schema_tree;
 
     std::string m_logtype_buf;

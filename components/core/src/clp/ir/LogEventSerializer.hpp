@@ -8,6 +8,7 @@
 #include <type_traits>
 #include <vector>
 
+#include "../ffi/ir_stream/IRBuffer.hpp"
 #include "../compressor_frontend/RDParser.hpp"
 #include "../ErrorCode.hpp"
 #include "../FileWriter.hpp"
@@ -121,7 +122,7 @@ private:
             epoch_time_ms_t,
             EmptyType> m_prev_event_timestamp{};
 
-    std::vector<int8_t> m_ir_buf;
+    IRBuffer m_ir_buf;
     FileWriter m_writer;
     streaming_compression::zstd::Compressor m_zstd_compressor;
     compressor_frontend::RDParser parser{"/mnt/clp/components/core/tests/test_state_files"};

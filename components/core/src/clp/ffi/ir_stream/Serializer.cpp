@@ -251,7 +251,7 @@ auto Serializer<encoded_variable_t>::create(
             ),
             cProtocol::MagicNumberLength
     };
-    ir_buf.insert(ir_buf.cend(), cMagicNumber.begin(), cMagicNumber.end());
+    ir_buf.insert(cMagicNumber.begin(), cMagicNumber.end());
 
     nlohmann::json metadata;
     metadata.emplace(cProtocol::Metadata::VersionKey, cProtocol::Metadata::BetaVersionValue);
@@ -367,12 +367,11 @@ auto Serializer<encoded_variable_t>::serialize_msgpack_map(msgpack::object_map c
     }
 
     m_ir_buf.insert(
-            m_ir_buf.cend(),
             m_schema_tree_node_buf.cbegin(),
             m_schema_tree_node_buf.cend()
     );
-    m_ir_buf.insert(m_ir_buf.cend(), m_key_group_buf.cbegin(), m_key_group_buf.cend());
-    m_ir_buf.insert(m_ir_buf.cend(), m_value_group_buf.cbegin(), m_value_group_buf.cend());
+    m_ir_buf.insert(m_key_group_buf.cbegin(), m_key_group_buf.cend());
+    m_ir_buf.insert(m_value_group_buf.cbegin(), m_value_group_buf.cend());
     return true;
 }
 

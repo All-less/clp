@@ -10,6 +10,7 @@
 #include "../../ir/types.hpp"
 #include "../../time_types.hpp"
 #include "../encoding_methods.hpp"
+#include "IRBuffer.hpp"
 
 namespace clp::ffi::ir_stream {
 
@@ -28,7 +29,7 @@ bool serialize_preamble(
         std::string_view timestamp_pattern,
         std::string_view timestamp_pattern_syntax,
         std::string_view time_zone_id,
-        std::vector<int8_t>& ir_buf
+        IRBuffer& ir_buf
 );
 
 /**
@@ -43,7 +44,7 @@ bool serialize_log_event(
         ir::epoch_time_ms_t timestamp,
         std::string_view message,
         std::string& logtype,
-        std::vector<int8_t>& ir_buf
+        IRBuffer& ir_buf
 );
 
 /**
@@ -53,7 +54,7 @@ bool serialize_log_event(
  * @param ir_buf
  * @return Whether the message was serialized successfully.
  */
-bool serialize_message(std::string_view message, std::string& logtype, std::vector<int8_t>& ir_buf);
+bool serialize_message(std::string_view message, std::string& logtype, IRBuffer& ir_buf);
 }  // namespace eight_byte_encoding
 
 namespace four_byte_encoding {
@@ -71,7 +72,7 @@ bool serialize_preamble(
         std::string_view timestamp_pattern_syntax,
         std::string_view time_zone_id,
         ir::epoch_time_ms_t reference_timestamp,
-        std::vector<int8_t>& ir_buf
+        IRBuffer& ir_buf
 );
 
 /**
@@ -86,13 +87,13 @@ bool serialize_log_event(
         ir::epoch_time_ms_t timestamp_delta,
         std::string_view message,
         std::string& logtype,
-        std::vector<int8_t>& ir_buf
+        IRBuffer& ir_buf
 );
 bool rd_serialize_log_event(
         ir::epoch_time_ms_t timestamp_delta,
         std::string_view message,
         std::string& logtype,
-        std::vector<int8_t>& ir_buf,
+        IRBuffer& ir_buf,
         compressor_frontend::RDParser& parser
 );
 
@@ -104,8 +105,8 @@ bool rd_serialize_log_event(
  * @param ir_buf
  * @return true on success, false otherwise
  */
-bool serialize_message(std::string_view message, std::string& logtype, std::vector<int8_t>& ir_buf);
-bool rd_serialize_message(std::string_view message, std::string& logtype, std::vector<int8_t>& ir_buf, compressor_frontend::RDParser& parser);
+bool serialize_message(std::string_view message, std::string& logtype, IRBuffer& ir_buf);
+bool rd_serialize_message(std::string_view message, std::string& logtype, IRBuffer& ir_buf, compressor_frontend::RDParser& parser);
 
 /**
  * Serializes the given timestamp delta into the four-byte encoding IR stream
@@ -113,7 +114,7 @@ bool rd_serialize_message(std::string_view message, std::string& logtype, std::v
  * @param ir_buf
  * @return true on success, false otherwise
  */
-bool serialize_timestamp(ir::epoch_time_ms_t timestamp_delta, std::vector<int8_t>& ir_buf);
+bool serialize_timestamp(ir::epoch_time_ms_t timestamp_delta, IRBuffer& ir_buf);
 }  // namespace four_byte_encoding
 
 /**
@@ -121,7 +122,7 @@ bool serialize_timestamp(ir::epoch_time_ms_t timestamp_delta, std::vector<int8_t
  * @param utc_offset
  * @param ir_buf
  */
-void serialize_utc_offset_change(UtcOffset utc_offset, std::vector<int8_t>& ir_buf);
+void serialize_utc_offset_change(UtcOffset utc_offset, IRBuffer& ir_buf);
 }  // namespace clp::ffi::ir_stream
 
 #endif  // CLP_FFI_IR_STREAM_ENCODING_METHODS_HPP

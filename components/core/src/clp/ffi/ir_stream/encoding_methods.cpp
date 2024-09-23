@@ -10,6 +10,7 @@
 #include "../../time_types.hpp"
 #include "protocol_constants.hpp"
 #include "utils.hpp"
+#include "IRBuffer.hpp"
 
 using clp::ir::eight_byte_encoded_variable_t;
 using clp::ir::epoch_time_ms_t;
@@ -33,7 +34,7 @@ void print_insert_time() {
  * @param ir_buf
  * @return true on success, false otherwise
  */
-static bool serialize_logtype(string_view logtype, vector<int8_t>& ir_buf);
+static bool serialize_logtype(string_view logtype, IRBuffer& ir_buf);
 
 /**
  * Adds the basic metadata fields to the given JSON object
@@ -58,7 +59,7 @@ public:
      * Functor constructor
      * @param ir_buf Output buffer for the encoded data
      */
-    explicit DictionaryVariableHandler(vector<int8_t>& ir_buf) : m_ir_buf(ir_buf) {}
+    explicit DictionaryVariableHandler(IRBuffer& ir_buf) : m_ir_buf(ir_buf) {}
 
     bool operator()(string_view message, size_t begin_pos, size_t end_pos) {
         auto length = end_pos - begin_pos;
@@ -75,15 +76,15 @@ public:
             return false;
         }
 	auto message_begin = message.cbegin();
-        m_ir_buf.insert(m_ir_buf.cend(), message_begin + begin_pos, message_begin + end_pos);
+        m_ir_buf.insert(message_begin + begin_pos, message_begin + end_pos);
         return true;
     }
 
 private:
-    vector<int8_t>& m_ir_buf;
+    IRBuffer& m_ir_buf;
 };
 
-static bool serialize_logtype(string_view logtype, vector<int8_t>& ir_buf) {
+static bool serialize_logtype(string_view logtype, IRBuffer& ir_buf) {
     auto length = logtype.length();
     if (length <= UINT8_MAX) {
         ir_buf.push_back(cProtocol::Payload::LogtypeStrLenUByte);
@@ -99,7 +100,7 @@ static bool serialize_logtype(string_view logtype, vector<int8_t>& ir_buf) {
         return false;
     }
     // auto const t0 = std::chrono::steady_clock::now();
-    ir_buf.insert(ir_buf.cend(), logtype.cbegin(), logtype.cend());
+    ir_buf.insert(logtype.cbegin(), logtype.cend());
     // auto const t1 = std::chrono::steady_clock::now();
     // insert_time += t1 - t0;
     return true;
@@ -124,7 +125,7 @@ bool serialize_preamble(
         string_view timestamp_pattern,
         string_view timestamp_pattern_syntax,
         string_view time_zone_id,
-        vector<int8_t>& ir_buf
+        IRBuffer& ir_buf
 ) {
     // Write magic number
     for (auto b : cProtocol::EightByteEncodingMagicNumber) {
@@ -147,7 +148,7 @@ bool serialize_log_event(
         epoch_time_ms_t timestamp,
         string_view message,
         string& logtype,
-        vector<int8_t>& ir_buf
+        IRBuffer& ir_buf
 ) {
     if (false == serialize_message(message, logtype, ir_buf)) {
         return false;
@@ -163,7 +164,7 @@ bool serialize_log_event(
 bool serialize_message(
         std::string_view message,
         std::string& logtype,
-        std::vector<int8_t>& ir_buf
+        IRBuffer& ir_buf
 ) {
     auto encoded_var_handler = [&ir_buf](eight_byte_encoded_variable_t encoded_var) {
         ir_buf.push_back(cProtocol::Payload::VarEightByteEncoding);
@@ -192,7 +193,7 @@ bool serialize_preamble(
         string_view timestamp_pattern_syntax,
         string_view time_zone_id,
         epoch_time_ms_t reference_timestamp,
-        vector<int8_t>& ir_buf
+        IRBuffer& ir_buf
 ) {
     // Write magic number
     for (auto b : cProtocol::FourByteEncodingMagicNumber) {
@@ -216,7 +217,7 @@ bool serialize_log_event(
         epoch_time_ms_t timestamp_delta,
         string_view message,
         string& logtype,
-        vector<int8_t>& ir_buf
+        IRBuffer& ir_buf
 ) {
     if (false == serialize_message(message, logtype, ir_buf)) {
         return false;
@@ -233,7 +234,7 @@ bool rd_serialize_log_event(
         epoch_time_ms_t timestamp_delta,
         string_view message,
         string& logtype,
-        vector<int8_t>& ir_buf,
+        IRBuffer& ir_buf,
         compressor_frontend::RDParser& parser
 ) {
     if (false == rd_serialize_message(message, logtype, ir_buf, parser)) {
@@ -272,7 +273,7 @@ bool serialize_message(string_view message, string& logtype, vector<int8_t>& ir_
     return true;
 }
 
-bool rd_serialize_message(string_view message, string& logtype, vector<int8_t>& ir_buf, compressor_frontend::RDParser& parser) {
+bool rd_serialize_message(string_view message, string& logtype, IRBuffer& ir_buf, compressor_frontend::RDParser& parser) {
     auto encoded_var_handler = [&ir_buf](four_byte_encoded_variable_t encoded_var) {
         ir_buf.push_back(cProtocol::Payload::VarFourByteEncoding);
         serialize_int(encoded_var, ir_buf);
@@ -298,7 +299,7 @@ bool rd_serialize_message(string_view message, string& logtype, vector<int8_t>& 
     return true;
 }
 
-bool serialize_timestamp(epoch_time_ms_t timestamp_delta, std::vector<int8_t>& ir_buf) {
+bool serialize_timestamp(epoch_time_ms_t timestamp_delta, IRBuffer& ir_buf) {
     if (INT8_MIN <= timestamp_delta && timestamp_delta <= INT8_MAX) {
         ir_buf.push_back(cProtocol::Payload::TimestampDeltaByte);
         ir_buf.push_back(static_cast<int8_t>(timestamp_delta));
@@ -320,8 +321,8 @@ bool serialize_timestamp(epoch_time_ms_t timestamp_delta, std::vector<int8_t>& i
 }
 }  // namespace four_byte_encoding
 
-void serialize_utc_offset_change(UtcOffset utc_offset, std::vector<int8_t>& ir_buf) {
-    ir_buf.emplace_back(cProtocol::Payload::UtcOffsetChange);
+void serialize_utc_offset_change(UtcOffset utc_offset, IRBuffer& ir_buf) {
+    ir_buf.push_back(cProtocol::Payload::UtcOffsetChange);
     serialize_int(static_cast<int64_t>(utc_offset.count()), ir_buf);
 }
 }  // namespace clp::ffi::ir_stream
