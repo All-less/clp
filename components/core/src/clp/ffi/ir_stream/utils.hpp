@@ -15,6 +15,7 @@
 #include "byteswap.hpp"
 #include "encoding_methods.hpp"
 #include "protocol_constants.hpp"
+#include "IRBuffer"
 
 namespace clp::ffi::ir_stream {
 /**
@@ -24,7 +25,7 @@ namespace clp::ffi::ir_stream {
  * @return Whether serialization succeeded.
  */
 [[nodiscard]] auto
-serialize_metadata(nlohmann::json& metadata, std::vector<int8_t>& output_buf) -> bool;
+serialize_metadata(nlohmann::json& metadata, IRBuffer& output_buf) -> bool;
 
 /**
  * Serializes the given integer into the IR stream.
@@ -33,7 +34,7 @@ serialize_metadata(nlohmann::json& metadata, std::vector<int8_t>& output_buf) ->
  * @param output_buf
  */
 template <typename integer_t>
-auto serialize_int(integer_t value, std::vector<int8_t>& output_buf) -> void;
+auto serialize_int(integer_t value, IRBuffer& output_buf) -> void;
 
 /**
  * Deserializes an integer from the given reader
@@ -57,7 +58,7 @@ template <typename encoded_variable_t>
 [[nodiscard]] auto serialize_clp_string(
         std::string_view str,
         std::string& logtype,
-        std::vector<int8_t>& output_buf
+        IRBuffer& output_buf
 ) -> bool;
 
 /**
@@ -66,10 +67,10 @@ template <typename encoded_variable_t>
  * @param output_buf
  * @return Whether serialization succeeded.
  */
-[[nodiscard]] auto serialize_string(std::string_view str, std::vector<int8_t>& output_buf) -> bool;
+[[nodiscard]] auto serialize_string(std::string_view str, IRBuffer& output_buf) -> bool;
 
 template <typename integer_t>
-auto serialize_int(integer_t value, std::vector<int8_t>& output_buf) -> void {
+auto serialize_int(integer_t value, IRBuffer& output_buf) -> void {
     integer_t value_big_endian{};
     static_assert(sizeof(integer_t) == 2 || sizeof(integer_t) == 4 || sizeof(integer_t) == 8);
     if constexpr (sizeof(value) == 2) {
@@ -81,7 +82,7 @@ auto serialize_int(integer_t value, std::vector<int8_t>& output_buf) -> void {
     }
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
     std::span<int8_t> const data_view{reinterpret_cast<int8_t*>(&value_big_endian), sizeof(value)};
-    output_buf.insert(output_buf.end(), data_view.begin(), data_view.end());
+    output_buf.insert(data_view.begin(), data_view.end());
 }
 
 template <typename integer_t>
@@ -109,7 +110,7 @@ template <typename encoded_variable_t>
 [[nodiscard]] auto serialize_clp_string(
         std::string_view str,
         std::string& logtype,
-        std::vector<int8_t>& output_buf
+        IRBuffer& output_buf
 ) -> bool {
     static_assert(
             (std::is_same_v<encoded_variable_t, clp::ir::eight_byte_encoded_variable_t>

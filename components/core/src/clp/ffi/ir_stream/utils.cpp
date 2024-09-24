@@ -10,7 +10,7 @@
 #include "protocol_constants.hpp"
 
 namespace clp::ffi::ir_stream {
-auto serialize_metadata(nlohmann::json& metadata, std::vector<int8_t>& output_buf) -> bool {
+auto serialize_metadata(nlohmann::json& metadata, IRBuffer& output_buf) -> bool {
     output_buf.push_back(cProtocol::Metadata::EncodingJson);
 
     auto const metadata_serialized
@@ -26,12 +26,12 @@ auto serialize_metadata(nlohmann::json& metadata, std::vector<int8_t>& output_bu
         // Can't encode metadata longer than 64 KiB
         return false;
     }
-    output_buf.insert(output_buf.cend(), metadata_serialized.cbegin(), metadata_serialized.cend());
+    output_buf.insert(metadata_serialized.cbegin(), metadata_serialized.cend());
 
     return true;
 }
 
-auto serialize_string(std::string_view str, std::vector<int8_t>& output_buf) -> bool {
+auto serialize_string(std::string_view str, IRBuffer& output_buf) -> bool {
     auto const length{str.length()};
     if (length <= UINT8_MAX) {
         output_buf.push_back(cProtocol::Payload::StrLenUByte);
@@ -46,7 +46,7 @@ auto serialize_string(std::string_view str, std::vector<int8_t>& output_buf) -> 
         // Out of range
         return false;
     }
-    output_buf.insert(output_buf.cend(), str.cbegin(), str.cend());
+    output_buf.insert(str.cbegin(), str.cend());
     return true;
 }
 }  // namespace clp::ffi::ir_stream
