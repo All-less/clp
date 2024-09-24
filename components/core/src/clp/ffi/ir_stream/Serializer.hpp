@@ -124,9 +124,9 @@ private:
     SchemaTree m_schema_tree;
 
     std::string m_logtype_buf;
-    Buffer m_schema_tree_node_buf;
-    Buffer m_key_group_buf;
-    Buffer m_value_group_buf;
+    IRBuffer m_schema_tree_node_buf;
+    IRBuffer m_key_group_buf;
+    IRBuffer m_value_group_buf;
 };
 }  // namespace clp::ffi::ir_stream
 

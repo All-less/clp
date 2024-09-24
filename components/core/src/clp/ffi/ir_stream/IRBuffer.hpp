@@ -15,6 +15,14 @@ public:
         return m_buf;
     }
 
+    const int8_t* begin() {
+        return m_buf;
+    }
+
+    const int8_t* end() {
+        return m_buf + m_size;
+    }
+
     size_t size() {
         return m_size;
     }
@@ -35,11 +43,11 @@ public:
     }
 
     void insert(const char* begin, const char* end) {
-	insert(reinterpret_cast<const int8_t*>(begin), reinterpret_cast<const int8_t*>(end));
+	    insert(reinterpret_cast<const int8_t*>(begin), reinterpret_cast<const int8_t*>(end));
     }
 
     void insert(std::vector<signed char>::iterator begin, std::vector<signed char>::iterator end) {
-	insert(&(*begin), &(*end));
+	    insert(&(*begin), &(*end));
     }
 
     void clear() {
