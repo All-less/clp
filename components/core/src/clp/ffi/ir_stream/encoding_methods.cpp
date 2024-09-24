@@ -248,7 +248,7 @@ bool rd_serialize_log_event(
     return true;
 }
 
-bool serialize_message(string_view message, string& logtype, vector<int8_t>& ir_buf) {
+bool serialize_message(string_view message, string& logtype, IRBuffer& ir_buf) {
     auto encoded_var_handler = [&ir_buf](four_byte_encoded_variable_t encoded_var) {
         ir_buf.push_back(cProtocol::Payload::VarFourByteEncoding);
         serialize_int(encoded_var, ir_buf);

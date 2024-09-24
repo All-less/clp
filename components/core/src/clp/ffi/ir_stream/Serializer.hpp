@@ -62,7 +62,7 @@ public:
     /**
      * @return A view of the underlying IR buffer which contains the serialized IR bytes.
      */
-    [[nodiscard]] auto get_ir_buf_view() const -> BufferView {
+    [[nodiscard]] auto get_ir_buf_view() -> BufferView {
         return {m_ir_buf.data(), m_ir_buf.size()};
     }
 

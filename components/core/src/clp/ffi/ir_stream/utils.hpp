@@ -15,7 +15,7 @@
 #include "byteswap.hpp"
 #include "encoding_methods.hpp"
 #include "protocol_constants.hpp"
-#include "IRBuffer"
+#include "IRBuffer.hpp"
 
 namespace clp::ffi::ir_stream {
 /**
@@ -81,8 +81,8 @@ auto serialize_int(integer_t value, IRBuffer& output_buf) -> void {
         value_big_endian = bswap_64(value);
     }
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-    std::span<int8_t> const data_view{reinterpret_cast<int8_t*>(&value_big_endian), sizeof(value)};
-    output_buf.insert(data_view.begin(), data_view.end());
+    auto value_ptr = reinterpret_cast<int8_t*>(&value_big_endian);
+    output_buf.insert(value_ptr, value_ptr + sizeof(value));
 }
 
 template <typename integer_t>

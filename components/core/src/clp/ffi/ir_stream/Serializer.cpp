@@ -91,6 +91,7 @@ private:
  * @param output_buf
  */
 auto serialize_value_empty_object(IRBuffer& output_buf) -> void;
+auto serialize_value_empty_object(std::vector<int8_t>& output_buf) -> void;
 
 /**
  * Serializes an integer.
@@ -98,27 +99,27 @@ auto serialize_value_empty_object(IRBuffer& output_buf) -> void;
  * @param output_buf
  * @return Whether serialization succeeded.
  */
-auto serialize_value_int(int64_t val, IRBuffer& output_buf) -> void;
+auto serialize_value_int(int64_t val, vector<int8_t>& output_buf) -> void;
 
 /**
  * Serializes a float.
  * @param val
  * @param output_buf
  */
-auto serialize_value_float(double val, IRBuffer& output_buf) -> void;
+auto serialize_value_float(double val, vector<int8_t>& output_buf) -> void;
 
 /**
  * Serializes a boolean.
  * @param val
  * @param output_buf
  */
-auto serialize_value_bool(bool val, IRBuffer& output_buf) -> void;
+auto serialize_value_bool(bool val, vector<int8_t>& output_buf) -> void;
 
 /**
  * Serializes a null.
  * @param output_buf
  */
-auto serialize_value_null(IRBuffer& output_buf) -> void;
+auto serialize_value_null(vector<int8_t>& output_buf) -> void;
 
 /**
  * Serializes a string.
@@ -130,7 +131,7 @@ auto serialize_value_null(IRBuffer& output_buf) -> void;
  */
 template <typename encoded_variable_t>
 [[nodiscard]] auto
-serialize_value_string(string_view val, string& logtype_buf, IRBuffer& output_buf) -> bool;
+serialize_value_string(string_view val, string& logtype_buf, vector<int8_t>& output_buf) -> bool;
 
 /**
  * Serializes a MessagePack array as a JSON string, using CLP's encoding for unstructured text.
@@ -182,7 +183,11 @@ auto serialize_value_empty_object(IRBuffer& output_buf) -> void {
     output_buf.push_back(cProtocol::Payload::ValueEmpty);
 }
 
-auto serialize_value_int(int64_t val, IRBuffer& output_buf) -> void {
+auto serialize_value_empty_object(std::vector<int8_t>& output_buf) -> void {
+    output_buf.push_back(cProtocol::Payload::ValueEmpty);
+}
+
+auto serialize_value_int(int64_t val, vector<int8_t>& output_buf) -> void {
     if (INT8_MIN <= val && val <= INT8_MAX) {
         output_buf.push_back(cProtocol::Payload::ValueInt8);
         output_buf.push_back(static_cast<int8_t>(val));
@@ -198,21 +203,21 @@ auto serialize_value_int(int64_t val, IRBuffer& output_buf) -> void {
     }
 }
 
-auto serialize_value_float(double val, IRBuffer& output_buf) -> void {
+auto serialize_value_float(double val, vector<int8_t>& output_buf) -> void {
     output_buf.push_back(cProtocol::Payload::ValueFloat);
     serialize_int(bit_cast<uint64_t>(val), output_buf);
 }
 
-auto serialize_value_bool(bool val, IRBuffer& output_buf) -> void {
+auto serialize_value_bool(bool val, vector<int8_t>& output_buf) -> void {
     output_buf.push_back(val ? cProtocol::Payload::ValueTrue : cProtocol::Payload::ValueFalse);
 }
 
-auto serialize_value_null(IRBuffer& output_buf) -> void {
+auto serialize_value_null(vector<int8_t>& output_buf) -> void {
     output_buf.push_back(cProtocol::Payload::ValueNull);
 }
 
 template <typename encoded_variable_t>
-auto serialize_value_string(string_view val, string& logtype_buf, IRBuffer& output_buf)
+auto serialize_value_string(string_view val, string& logtype_buf, vector<int8_t>& output_buf)
         -> bool {
     if (string_view::npos == val.find(' ')) {
         return serialize_string(val, output_buf);
@@ -225,7 +230,7 @@ template <typename encoded_variable_t>
 auto serialize_value_array(
         msgpack::object const& val,
         string& logtype_buf,
-        IRBuffer& output_buf
+        vector<int8_t>& output_buf
 ) -> bool {
     std::ostringstream oss;
     oss << val;
@@ -252,7 +257,7 @@ auto Serializer<encoded_variable_t>::create(
             ),
             cProtocol::MagicNumberLength
     };
-    ir_buf.insert(cMagicNumber.begin(), cMagicNumber.end());
+    ir_buf.insert(reinterpret_cast<const int8_t*>(cMagicNumber.begin()), reinterpret_cast<const int8_t*>(cMagicNumber.end()));
 
     nlohmann::json metadata;
     metadata.emplace(cProtocol::Metadata::VersionKey, cProtocol::Metadata::BetaVersionValue);
@@ -368,11 +373,11 @@ auto Serializer<encoded_variable_t>::serialize_msgpack_map(msgpack::object_map c
     }
 
     m_ir_buf.insert(
-            m_schema_tree_node_buf.cbegin(),
-            m_schema_tree_node_buf.cend()
+            m_schema_tree_node_buf.begin(),
+            m_schema_tree_node_buf.end()
     );
-    m_ir_buf.insert(m_key_group_buf.cbegin(), m_key_group_buf.cend());
-    m_ir_buf.insert(m_value_group_buf.cbegin(), m_value_group_buf.cend());
+    m_ir_buf.insert(m_key_group_buf.begin(), m_key_group_buf.end());
+    m_ir_buf.insert(m_value_group_buf.begin(), m_value_group_buf.end());
     return true;
 }
 
