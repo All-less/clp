@@ -106,6 +106,7 @@ bool rd_serialize_log_event(
  * @return true on success, false otherwise
  */
 bool serialize_message(std::string_view message, std::string& logtype, IRBuffer& ir_buf);
+bool serialize_message(std::string_view message, std::string& logtype, std::vector<int8_t>& ir_buf);
 bool rd_serialize_message(std::string_view message, std::string& logtype, IRBuffer& ir_buf, compressor_frontend::RDParser& parser);
 
 /**

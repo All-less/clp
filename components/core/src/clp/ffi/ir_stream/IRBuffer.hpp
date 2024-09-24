@@ -26,7 +26,7 @@ public:
     void insert(int8_t* begin, int8_t* end) {
         auto len = end - begin;
         for (auto i = 0; i < len; i++) {
-            m_buf[m_pos+i] = e;
+            m_buf[m_pos+i] = *(begin+i);
         }
         m_pos += len;
         m_size += len;
@@ -38,7 +38,7 @@ public:
     }
 
 private:
-    int8_t m_buf[13e7];
+    int8_t m_buf[130'000'000];
     size_t m_size;
     size_t m_pos;
 };
