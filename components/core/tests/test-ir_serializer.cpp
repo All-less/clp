@@ -4,6 +4,11 @@
 #include <numeric>
 #include <string>
 #include <vector>
+#include <fstream>
+#include <iomanip>
+#include <sstream>
+#include <ctime>
+#include <iostream>
 
 #include <Catch2/single_include/catch2/catch.hpp>
 
@@ -23,10 +28,17 @@ using clp::ir::LogEventDeserializer;
 using clp::ir::LogEventSerializer;
 using clp::streaming_compression::zstd::Decompressor;
 using std::chrono::milliseconds;
+using std::chrono::nanoseconds;
 using std::chrono::system_clock;
 using std::is_same_v;
 using std::string;
 using std::vector;
+using std::ifstream;
+using std::string;
+using std::getline;
+using std::istringstream;
+using std::time_t;
+using std::tm;
 
 namespace {
 struct TestLogEvent {
@@ -117,4 +129,64 @@ TEMPLATE_TEST_CASE(
     REQUIRE(deserialized_result.has_error());
 
     std::filesystem::remove(ir_test_file);
+}
+
+void read_events(vector<TestLogEvent> &test_log_events) {
+    nanoseconds read_time;
+    auto const t0 = std::chrono::steady_clock::now();
+
+    tm tm = {};
+
+    ifstream log_file{"/mnt/clp/components/core/build/nodemanager-deduped-single.log"};
+    string line;
+    char comma;
+    int msec;
+    while (getline(log_file, line)) {
+        istringstream ss(line.substr(0, 23));
+        ss >> std::get_time(&tm, "%Y-%m-%d %H:%M:%S") >> comma >> msec;
+        auto timeSinceEpoch = std::mktime(&tm);
+        auto unixTimestampInMilliseconds = static_cast<epoch_time_ms_t>(timeSinceEpoch) * 1000 + msec;
+
+        test_log_events.push_back({ unixTimestampInMilliseconds, line.substr(23) + "\n" });
+    }
+
+    auto const t1 = std::chrono::steady_clock::now();
+    read_time = t1 - t0;
+    std::cout << "Time spent in reading logs is " << read_time.count() << std::endl;
+}
+
+TEMPLATE_TEST_CASE(
+        "End-to-end cncode and serialize log events ",
+        "[ir][serialize-e2e]",
+        four_byte_encoded_variable_t
+        // eight_byte_encoded_variable_t
+) {
+    vector<TestLogEvent> test_log_events;
+    read_events(test_log_events);
+
+    string ir_test_file = "ir_serializer_test_e2e";
+    ir_test_file += cIrFileExtension;
+
+    LogEventSerializer<TestType> serializer;
+    REQUIRE(serializer.open(ir_test_file));
+
+    nanoseconds serializing_time;
+    auto const t0 = std::chrono::steady_clock::now();
+    // for (auto i = 0; i < 10; i++) {
+    for (auto const& test_log_event : test_log_events) {
+        REQUIRE(serializer.serialize_log_event(test_log_event.timestamp, test_log_event.msg));
+    }
+    // }
+    auto const t1 = std::chrono::steady_clock::now();
+    serializing_time = t1 - t0;
+    std::cout << "Time spent serializing log events is " << serializing_time.count() << std::endl;
+
+    std::cout << "Serialized size is " << serializer.get_serialized_size() << std::endl;
+
+    nanoseconds write_time;
+    auto const t2 = std::chrono::steady_clock::now();
+    serializer.close();
+    auto const t3 = std::chrono::steady_clock::now();
+    write_time = t3 - t2;
+    std::cout << "Time spent writing IR is " << write_time.count() << std::endl;
 }
