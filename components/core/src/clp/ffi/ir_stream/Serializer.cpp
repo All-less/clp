@@ -244,6 +244,7 @@ auto Serializer<encoded_variable_t>::create(
 
     Serializer<encoded_variable_t> serializer;
     auto& ir_buf{serializer.m_ir_buf};
+    /*
     constexpr BufferView cMagicNumber{
             static_cast<int8_t const*>(
                     std::is_same_v<encoded_variable_t, eight_byte_encoded_variable_t>
@@ -253,6 +254,13 @@ auto Serializer<encoded_variable_t>::create(
             cProtocol::MagicNumberLength
     };
     ir_buf.insert(reinterpret_cast<const int8_t*>(cMagicNumber.begin()), reinterpret_cast<const int8_t*>(cMagicNumber.end()));
+    */
+    auto number_ptr = static_cast<int8_t const*>(
+                    std::is_same_v<encoded_variable_t, eight_byte_encoded_variable_t>
+                            ? cProtocol::EightByteEncodingMagicNumber
+                            : cProtocol::FourByteEncodingMagicNumber
+                    );
+    ir_buf.insert(number_ptr, number_ptr + cProtocol::MagicNumberLength);
 
     nlohmann::json metadata;
     metadata.emplace(cProtocol::Metadata::VersionKey, cProtocol::Metadata::BetaVersionValue);

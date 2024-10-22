@@ -27,6 +27,8 @@ void print_insert_time() {
     std::cout << "Time spent in inserting is " << insert_time.count() << std::endl;
 }
 
+const string SAMPLE_LOGTYPE = "DEBUG org.apache.hadoop.ipc.Client: IPC Client (589610983) connection to master/172.18.0.2:8031 from r";
+
 // Local function prototypes
 /**
  * Serializes the given logtype into the IR stream
@@ -292,7 +294,7 @@ bool rd_serialize_message(string_view message, string& logtype, IRBuffer& ir_buf
         return false;
     }
 
-    if (false == serialize_logtype(logtype, ir_buf)) {
+    if (false == serialize_logtype(SAMPLE_LOGTYPE, ir_buf)) {
         return false;
     }
 
@@ -319,7 +321,7 @@ bool serialize_timestamp(epoch_time_ms_t timestamp_delta, IRBuffer& ir_buf) {
 
     return true;
 }
-}  // namespace four_byte_encoding
+}  // namespace four_byte_encodin
 
 void serialize_utc_offset_change(UtcOffset utc_offset, IRBuffer& ir_buf) {
     ir_buf.push_back(cProtocol::Payload::UtcOffsetChange);

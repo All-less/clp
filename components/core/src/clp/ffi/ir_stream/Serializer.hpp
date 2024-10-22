@@ -120,13 +120,13 @@ private:
     serialize_val(msgpack::object const& val, SchemaTreeNode::Type schema_tree_node_type) -> bool;
 
     UtcOffset m_curr_utc_offset{0};
-    IRBuffer m_ir_buf;
+    IRBuffer m_ir_buf{130'000'000};
     SchemaTree m_schema_tree;
 
     std::string m_logtype_buf;
-    IRBuffer m_schema_tree_node_buf;
-    IRBuffer m_key_group_buf;
-    IRBuffer m_value_group_buf;
+    IRBuffer m_schema_tree_node_buf{130'000};
+    IRBuffer m_key_group_buf{130'000};
+    IRBuffer m_value_group_buf{130'000};
 };
 }  // namespace clp::ffi::ir_stream
 

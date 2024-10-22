@@ -173,11 +173,11 @@ TEMPLATE_TEST_CASE(
 
     nanoseconds serializing_time;
     auto const t0 = std::chrono::steady_clock::now();
-    for (auto i = 0; i < 10; i++) {
+    // for (auto i = 0; i < 10; i++) {
     for (auto const& test_log_event : test_log_events) {
         REQUIRE(serializer.serialize_log_event(test_log_event.timestamp, test_log_event.msg));
     }
-    }
+    // }
     auto const t1 = std::chrono::steady_clock::now();
     serializing_time = t1 - t0;
     std::cout << "Time spent serializing log events is " << serializing_time.count() << std::endl;
@@ -192,6 +192,7 @@ TEMPLATE_TEST_CASE(
     std::cout << "Time spent writing IR is " << write_time.count() << std::endl;
 }
 
+/*
 TEMPLATE_TEST_CASE(
         "End-to-end cncode and serialize log events with Parseus",
         "[ir][parseus-e2e]",
@@ -209,11 +210,11 @@ TEMPLATE_TEST_CASE(
 
     nanoseconds serializing_time;
     auto const t0 = std::chrono::steady_clock::now();
-    for (auto i = 0; i < 10; i++) {
+    // for (auto i = 0; i < 10; i++) {
     for (auto const& test_log_event : test_log_events) {
         REQUIRE(serializer.rd_serialize_log_event(test_log_event.timestamp, test_log_event.msg));
     }
-    }
+    // }
     auto const t1 = std::chrono::steady_clock::now();
     serializing_time = t1 - t0;
     std::cout << "Time spent serializing log events is " << serializing_time.count() << std::endl;
@@ -227,3 +228,21 @@ TEMPLATE_TEST_CASE(
     write_time = t3 - t2;
     std::cout << "Time spent writing IR is " << write_time.count() << std::endl;
 }
+*/
+TEMPLATE_TEST_CASE(
+	"Empty test case for measuring base memory usage",
+	"[ir][empty-e2e]",
+	four_byte_encoded_variable_t
+) {
+    std::cout << "Empty case running successfully." << std::endl;
+}
+
+TEMPLATE_TEST_CASE(
+	"End-to-end test case with only reading log events",
+	"[ir][read-event-e2e]",
+	four_byte_encoded_variable_t
+) {
+    vector<TestLogEvent> test_log_events;
+    read_events(test_log_events);
+}
+

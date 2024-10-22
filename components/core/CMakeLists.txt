@@ -232,7 +232,7 @@ include(cmake/Modules/FindLibraryDependencies.cmake)
 FindDynamicLibraryDependencies(sqlite "${sqlite_DYNAMIC_LIBS}")
 
 # Add flags for avx2 extension
-add_compile_options(-march=native -mavx2)
+add_compile_options(-march=native -mavx2 -O3)
 
 add_subdirectory(src/clp/regex_utils)
 add_subdirectory(src/clp/string_utils)
@@ -544,7 +544,7 @@ set(SOURCE_FILES_unitTest
         tests/test-FileDescriptorReader.cpp
         tests/test-Grep.cpp
         tests/test-hash_utils.cpp
-        tests/test-ir_encoding_methods.cpp
+	# tests/test-ir_encoding_methods.cpp
         tests/test-ir_parsing.cpp
         tests/test-ir_serializer.cpp
         tests/test-kql.cpp

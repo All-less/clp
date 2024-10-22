@@ -129,6 +129,7 @@ auto LogEventSerializer<encoded_variable_t>::serialize_log_event(
     return true;
 }
 
+/*
 template <typename encoded_variable_t>
 auto LogEventSerializer<encoded_variable_t>::rd_serialize_log_event(
         epoch_time_ms_t timestamp,
@@ -166,7 +167,7 @@ auto LogEventSerializer<encoded_variable_t>::rd_serialize_log_event(
     ++m_num_log_events;
     return true;
 }
-
+*/
 
 template <typename encoded_variable_t>
 auto LogEventSerializer<encoded_variable_t>::close_writer() -> void {
@@ -194,10 +195,12 @@ template auto LogEventSerializer<four_byte_encoded_variable_t>::serialize_log_ev
         epoch_time_ms_t timestamp,
         string_view message
 ) -> bool;
+/*
 template auto LogEventSerializer<four_byte_encoded_variable_t>::rd_serialize_log_event(
         epoch_time_ms_t timestamp,
         string_view message
 ) -> bool;
+*/
 template auto LogEventSerializer<eight_byte_encoded_variable_t>::close_writer() -> void;
 template auto LogEventSerializer<four_byte_encoded_variable_t>::close_writer() -> void;
 }  // namespace clp::ir

@@ -91,8 +91,8 @@ public:
      */
     [[nodiscard]] auto
     serialize_log_event(epoch_time_ms_t timestamp, std::string_view message) -> bool;
-    [[nodiscard]] auto
-    rd_serialize_log_event(epoch_time_ms_t timestamp, std::string_view message) -> bool;
+    // [[nodiscard]] auto
+    // rd_serialize_log_event(epoch_time_ms_t timestamp, std::string_view message) -> bool;
 
 private:
     // Constants
@@ -122,10 +122,10 @@ private:
             epoch_time_ms_t,
             EmptyType> m_prev_event_timestamp{};
 
-    ffi::ir_stream::IRBuffer m_ir_buf;
+    ffi::ir_stream::IRBuffer m_ir_buf{130'000'000};
     FileWriter m_writer;
     streaming_compression::zstd::Compressor m_zstd_compressor;
-    compressor_frontend::RDParser parser{"/mnt/clp/components/core/tests/test_state_files"};
+    // compressor_frontend::RDParser parser{"/mnt/clp/components/core/tests/test_state_files"};
 
     bool m_is_open{false};
 };

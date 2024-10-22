@@ -26,7 +26,7 @@ auto serialize_metadata(nlohmann::json& metadata, IRBuffer& output_buf) -> bool 
         // Can't encode metadata longer than 64 KiB
         return false;
     }
-    output_buf.insert(metadata_serialized.cbegin(), metadata_serialized.cend());
+    output_buf.insert(&(*metadata_serialized.begin()), &(*metadata_serialized.end()));
 
     return true;
 }
@@ -46,7 +46,7 @@ auto serialize_string(std::string_view str, IRBuffer& output_buf) -> bool {
         // Out of range
         return false;
     }
-    output_buf.insert(str.cbegin(), str.cend());
+    output_buf.insert(&(*str.begin()), &(*str.end()));
     return true;
 }
 }  // namespace clp::ffi::ir_stream
