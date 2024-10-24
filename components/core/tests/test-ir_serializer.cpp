@@ -192,7 +192,6 @@ TEMPLATE_TEST_CASE(
     std::cout << "Time spent writing IR is " << write_time.count() << std::endl;
 }
 
-/*
 TEMPLATE_TEST_CASE(
         "End-to-end cncode and serialize log events with Parseus",
         "[ir][parseus-e2e]",
@@ -228,7 +227,7 @@ TEMPLATE_TEST_CASE(
     write_time = t3 - t2;
     std::cout << "Time spent writing IR is " << write_time.count() << std::endl;
 }
-*/
+
 TEMPLATE_TEST_CASE(
 	"Empty test case for measuring base memory usage",
 	"[ir][empty-e2e]",
