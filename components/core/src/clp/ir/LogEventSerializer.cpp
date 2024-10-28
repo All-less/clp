@@ -1,5 +1,6 @@
 #include "LogEventSerializer.hpp"
 
+#include <iostream>
 #include <string>
 #include <string_view>
 
@@ -14,6 +15,8 @@
 
 using std::string;
 using std::string_view;
+
+int flush_count = 0;
 
 namespace clp::ir {
 template <typename encoded_variable_t>
@@ -101,6 +104,17 @@ auto LogEventSerializer<encoded_variable_t>::serialize_log_event(
         throw OperationFailed(ErrorCode_NotInit, __FILENAME__, __LINE__);
     }
 
+    if (m_ir_buf.capacity() >= 0.78e3 && m_ir_buf.size() >= 0.78e3) {
+	if (flush_count == 0) {
+	    std::cout << "Flush when ir_buf.capacity() is " << m_ir_buf.capacity() << " and ir_buf.size() is " << m_ir_buf.size() << std::endl;
+	}
+	flush_count += 1;
+	if (flush_count % 10000 == 0) {
+	    std::cout << "Flushed buffer " << flush_count << " times." << std::endl;
+	}
+        flush();
+    }
+
     string logtype;
     bool res{};
     auto const buf_size_before_serialization = m_ir_buf.size();
@@ -131,6 +145,8 @@ auto LogEventSerializer<encoded_variable_t>::serialize_log_event(
 
 template <typename encoded_variable_t>
 auto LogEventSerializer<encoded_variable_t>::close_writer() -> void {
+    std::cout << "Capacity of ir_buf: " << m_ir_buf.capacity() << std::endl;
+    std::cout << "Size of ir_buf: " << m_ir_buf.size() << std::endl;
     m_zstd_compressor.close();
     m_writer.close();
 }

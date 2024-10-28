@@ -1,3 +1,5 @@
+#include <sys/time.h>
+#include <sys/resource.h>
 #include <chrono>
 #include <cstdint>
 #include <filesystem>
@@ -155,6 +157,12 @@ void read_events(vector<TestLogEvent> &test_log_events) {
     std::cout << "Time spent in reading logs is " << read_time.count() << std::endl;
 }
 
+void print_memory_usage() {
+    struct rusage u;
+    getrusage(RUSAGE_SELF, &u);
+    std::cout << "Maximum resident set size (in kilobytes) at current point is " << u.ru_maxrss << std::endl;
+}
+
 TEMPLATE_TEST_CASE(
         "End-to-end cncode and serialize log events ",
         "[ir][serialize-e2e]",
@@ -163,6 +171,8 @@ TEMPLATE_TEST_CASE(
 ) {
     vector<TestLogEvent> test_log_events;
     read_events(test_log_events);
+
+    print_memory_usage();
 
     string ir_test_file = "ir_serializer_test_e2e";
     ir_test_file += cIrFileExtension;
@@ -189,4 +199,6 @@ TEMPLATE_TEST_CASE(
     auto const t3 = std::chrono::steady_clock::now();
     write_time = t3 - t2;
     std::cout << "Time spent writing IR is " << write_time.count() << std::endl;
+
+    print_memory_usage();
 }
