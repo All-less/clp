@@ -175,3 +175,19 @@ class ClpConnector:
             results.append(doc)
 
         return results
+
+    async def read_metadata_results(self, query_id: str) -> list[dict]:
+        """
+        Reads the metadata results of a query.
+
+        :param query_id: The ID of the query.
+        :return: A list of metadata result documents.
+        """
+        collection = self._results_cache[str(query_id)]
+        results = []
+
+        async for doc in collection.find({}, limit=SEARCH_MAX_NUM_RESULTS):
+            doc["_id"] = None
+            results.append(doc)
+
+        return results

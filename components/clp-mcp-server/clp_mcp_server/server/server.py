@@ -1,5 +1,6 @@
 """MCP Server implementation."""
 
+import json
 from typing import Any
 
 from clp_py_utils.clp_config import ClpConfig
@@ -28,6 +29,25 @@ def create_mcp_server(clp_config: ClpConfig) -> FastMCP:
     session_manager = SessionManager(session_ttl_seconds=constants.SESSION_TTL_SECONDS)
 
     connector = ClpConnector(clp_config)
+
+    async def _execute_metadata_query(session_id: str, kql_query: str) -> dict[str, Any]:
+        """
+        Executes a KQL metadata query and returns the results.
+
+        :param session_id:
+        :param kql_query:
+        :return: A dictionary containing the metadata results on success.
+        :return: A dictionary with the following key-value pair on failures:
+            - "Error": An error message describing the failure.
+        """
+        try:
+            query_id = await connector.submit_query(kql_query)
+            await connector.wait_query_completion(query_id)
+            results = await connector.read_metadata_results(query_id)
+        except (ValueError, RuntimeError, TimeoutError) as e:
+            return {"Error": str(e)}
+
+        return {"results": results}
 
     async def _execute_kql_query(
         session_id: str,
@@ -162,6 +182,65 @@ def create_mcp_server(clp_config: ClpConfig) -> FastMCP:
             return {"Error": str(e)}
 
         return await _execute_kql_query(ctx.session_id, kql_query, begin_ts, end_ts)
+
+    # @mcp.tool
+    # async def search_and_group_by(kql_query: str, groupby: str, ctx: Context):
+    #     await session_manager.start()
+
+    #     result = await _execute_kql_query(ctx.session_id, kql_query)
+    #     pass
+
+    @mcp.tool
+    async def search_and_output_logtypes(kql_query: str, ctx: Context):
+        """
+        Retrieves all log types that match the given Kibana Query Language (KQL) query.
+        :param kql_query: The KQL query string to search for within log types.
+        :param ctx: The `FastMCP` context containing the metadata of the underlying MCP
+        ession.
+        """
+        await session_manager.start()
+
+        query_result = await _execute_metadata_query(ctx.session_id, "stats.logtypes")
+        if "Error" in query_result:
+            return query_result
+
+        result = []
+        for logtype_doc in query_result["results"]:
+            try:
+                doc = json.loads(logtype_doc["message"])
+                if kql_query in doc.get("logtype", ""):
+                    result.append(doc)
+            except json.JSONDecodeError:
+                if kql_query in logtype_doc.get("message", ""):
+                    result.append(logtype_doc.get("message"))
+        
+        return result
+        
+
+    @mcp.tool
+    async def get_variable_values_with_counts(variable_name: str, ctx: Context):
+        """
+        Retrieves all values and their counts for the specified variable.
+        :param variable_name: The name of the variable to retrieve values for.
+        :param ctx: The `FastMCP` context containing the metadata of the underlying MCP
+        """
+        await session_manager.start()
+
+        query_result = await _execute_metadata_query(ctx.session_id, "stats.variables")
+        if "Error" in query_result:
+            return query_result
+        
+        result = []
+        for var_doc in query_result["results"]:
+            try:
+                doc = json.loads(var_doc["message"])
+                if variable_name == doc.get("type", ""):
+                    result.append(doc)
+            except json.JSONDecodeError:
+                if variable_name in var_doc.get("message", ""):
+                    result.append(var_doc.get("message", ""))
+        
+        return result
 
     @mcp.custom_route("/health", methods=["GET"])
     async def health_check(_request: Request) -> PlainTextResponse:

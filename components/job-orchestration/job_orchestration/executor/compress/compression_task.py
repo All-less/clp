@@ -280,11 +280,13 @@ def _make_clp_s_command_and_env(
     # fmt: off
     compression_cmd = [
         str(clp_home / "bin" / "clp-s"),
+        "--experimental",
         "c", str(archive_output_dir),
         "--print-archive-stats",
         "--target-encoded-size",
         str(clp_config.output.target_segment_size + clp_config.output.target_dictionaries_size),
         "--compression-level", str(clp_config.output.compression_level),
+        "--schema-path", str(clp_home / "etc" / "log-surgeon-schema.txt"),
     ]
     # fmt: on
 

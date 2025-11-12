@@ -57,6 +57,7 @@ def _make_core_clp_s_command_and_env_vars(
 ) -> Tuple[Optional[List[str]], Optional[Dict[str, str]]]:
     command = [
         str(clp_home / "bin" / "clp-s"),
+        "--experimental",
         "s",
     ]
 
