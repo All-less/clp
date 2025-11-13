@@ -1,6 +1,7 @@
 """MCP Server implementation."""
 
 import json
+from collections import defaultdict, Counter
 from typing import Any
 
 from clp_py_utils.clp_config import ClpConfig
@@ -183,12 +184,128 @@ def create_mcp_server(clp_config: ClpConfig) -> FastMCP:
 
         return await _execute_kql_query(ctx.session_id, kql_query, begin_ts, end_ts)
 
-    # @mcp.tool
-    # async def search_and_group_by(kql_query: str, groupby: str, ctx: Context):
-    #     await session_manager.start()
+    def flatten_dict(d, parent_key='', sep='.'):
+        items = []
+        for k, v in d.items():
+            new_key = parent_key + sep + k if parent_key else k
+            if isinstance(v, dict):
+                items.extend(flatten_dict(v, new_key, sep=sep).items())
+            else:
+                items.append((new_key, v))
+        return dict(items)
 
-    #     result = await _execute_kql_query(ctx.session_id, kql_query)
-    #     pass
+    def access(doc, keys):
+        if not keys:
+            return doc
+        elif keys[0] in doc:
+            return access(doc[keys[0]], keys[1:])
+        else:
+            return None
+
+    def gen_counter(iterable):
+        res = {}
+        for item in iterable:
+            if item in res:
+                res[item] += 1
+            else:
+                res[item] = 1
+        return res
+
+    def group_by_vars(docs):
+        flattened_docs = []
+        for doc in docs:
+            doc['message'] = json.loads(doc['message'])
+            processed_doc = {
+                "LogType": doc['message']['msg']['LogType'],
+                "Timestamp": doc['message']['timestamp']
+            }
+            del doc['message']['msg']['LogType']
+            del doc['message']['timestamp']
+            processed_doc["Variables"] = flatten_dict(doc['message'])
+            flattened_docs.append(processed_doc)
+
+        group_by_logtype = defaultdict(list)
+        for doc in flattened_docs:
+            group_by_logtype[doc['LogType']].append(doc)
+
+        grouped_result = {}
+        for logType, docs in group_by_logtype.items():
+            grouped_result[logType] = {
+                "Timestamps": [doc['Timestamp'] for doc in docs],
+                "Repetitions": len(docs),
+                "GroupBy": {}
+            }
+            
+            variable_counter = defaultdict(Counter)
+            for doc in docs:
+                for var_name, var_value in doc['Variables'].items():
+                    variable_counter[var_name][var_value] += 1
+            
+            grouped_result[logType]["GroupBy"] = dict(variable_counter)
+        
+        return [ { "LogType": k, **v } for k, v in grouped_result.items() ]
+
+    def group_by_key(docs, groupby):
+        if '.' in groupby:
+            fields = groupby.split('.')
+        else:
+            fields = [groupby]
+                
+        filtered_result = []
+        for doc in docs:
+            doc['message'] = json.loads(doc['message'])
+            if (val := access(doc['message'], fields)) is not None:
+                filtered_result.append({
+                    "LogType": doc['message']['msg']['LogType'],
+                    "Value": val,
+                    "Timestamp": doc['message']['timestamp']
+                })
+
+        group_by_logtype = defaultdict(list)
+        for doc in filtered_result:
+            group_by_logtype[doc['LogType']].append(doc)
+
+        grouped_result = {}
+        for logType, docs in group_by_logtype.items():
+            grouped_result[logType] = {
+                "Timestamps": [doc['Timestamp'] for doc in docs],
+                "Repetitions": len(docs),
+                "GroupBy": {
+                    groupby: Counter([doc['Value'] for doc in docs])
+                }
+            }
+        
+        return [ { "LogType": k, **v } for k, v in grouped_result.items() ]
+
+    @mcp.tool
+    async def search_and_group_by(kql_query: str, groupby: str, ctx: Context):
+        """
+        Searches log events that match the given Kibana Query Language (KQL) query and groups
+        the results by the specified variable or all variables.
+
+        :param kql_query: The KQL query string to search for within log events.
+        :param groupby: The variable name to group by, or '*' to group by all variables. The variable
+        name can be nested using dot notation (e.g., 'field1.field2').
+        :param ctx: The `FastMCP` context containing the metadata of the underlying MCP session.
+        :return: A list of grouped results, where each group contains the log type, timestamps,
+            repetitions, and grouped variable counts.
+        :raise: Exception if any error occurs during processing.
+        """
+        await session_manager.start()
+
+        # TODO(refactor): here should be _execute_kql_query but it has caching. 
+        query_result = await _execute_metadata_query(ctx.session_id, kql_query)
+        if "Error" in query_result:
+            return query_result
+
+        try:
+            if groupby == '*':
+                return group_by_vars(query_result['results'])
+            else:
+                return group_by_key(query_result['results'], groupby)
+        except Exception as e:
+            return {"Error": str(e)}
+
 
     @mcp.tool
     async def search_and_output_logtypes(kql_query: str, ctx: Context):
